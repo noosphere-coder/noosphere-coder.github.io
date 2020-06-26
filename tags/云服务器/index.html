@@ -19,7 +19,23 @@
 <link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
 
-<script id="baidu_push">
+<script id="baidu_analytics">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?438bb344f6f5031be90f213101b87127";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script><!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-170909162-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-170909162-1');
+</script><script id="baidu_push">
 (function(){
     var bp = document.createElement('script');
     var curProtocol = window.location.protocol.split(':')[0];
@@ -33,8 +49,14 @@
     s.parentNode.insertBefore(bp, s);
 })();
 </script>
-<script>
-  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":"","latex":false};
+<script src="//cdn1.lncld.net/static/js/3.1.1/av-min.js"></script>
+  <script id="leancloud">
+    AV.init({
+      appId: "AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz",
+      appKey: "GTE9k7Cyl9mtVbUHbvdIxXvc"
+    });
+  </script><script>
+  window.config = {"leancloud":{"app_id":"AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz","app_key":"GTE9k7Cyl9mtVbUHbvdIxXvc"},"toc":true,"fancybox":true,"pjax":"","latex":false};
 </script>
 
     <title>云服务器 · Hexo

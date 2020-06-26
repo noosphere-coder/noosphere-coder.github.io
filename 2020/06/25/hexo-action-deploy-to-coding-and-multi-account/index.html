@@ -13,8 +13,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
-<link rel="alternate" href="/default" title="Hexo"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
-<link rel="canonical" href="http://yoursite.com/"/>
+<meta name="description" content="使用github action同时部署hexo到github和coding(支持多账号)"/><meta name="keywords" content="hexo, github action, Hexo" /><link rel="alternate" href="/default" title="Hexo"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="http://yoursite.com/2020/06/25/hexo-action-deploy-to-coding-and-multi-account/"/>
 
 <link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
@@ -59,7 +59,7 @@
   window.config = {"leancloud":{"app_id":"AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz","app_key":"GTE9k7Cyl9mtVbUHbvdIxXvc"},"toc":true,"fancybox":true,"pjax":"","latex":false};
 </script>
 
-    <title>Hexo</title>
+    <title>使用github action同时部署hexo到github和coding(支持多账号) - Hexo</title>
   <meta name="generator" content="Hexo 4.2.1"></head>
 
   <body><div id="mobile-navbar" class="mobile-navbar">
@@ -94,9 +94,9 @@
 
       <main id="main" class="main">
         <div class="content-wrapper">
-          <div id="content" class="content"><section id="posts" class="posts"><article class="post">
+          <div id="content" class="content"><article class="post">
     <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/2020/06/25/hexo-action-deploy-to-coding-and-multi-account/">使用github action同时部署hexo到github和coding(支持多账号)</a>
+      <h1 class="post-title">使用github action同时部署hexo到github和coding(支持多账号)
         </h1>
 
       <div class="post-meta">
@@ -110,7 +110,12 @@
         </div>
     </header>
 
-    <div class="post-content"><h1 id="features"><a href="#features" class="headerlink" title="features"></a>features</h1><p>我们知道使用github action 可以很简单的部署hexo的静态文件到github pages，但是如果在国内我们希望部署到github pages同时也部署到coding，然后通过dns双线路由，另外，我们可能有多个账号，比如公司的和个人的博客或者网站，也是同时部署到coding和github，那就这个github action解决不了，下面我们改造一下，使其达到这个目标：</p>
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#features"><span class="toc-text">features</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#use"><span class="toc-text">use</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#how"><span class="toc-text">how</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#改造-entrypoint-sh"><span class="toc-text">改造 entrypoint.sh</span></a></li></ol></li></ol>
+    </div>
+  </div><div class="post-content"><h1 id="features"><a href="#features" class="headerlink" title="features"></a>features</h1><p>我们知道使用github action 可以很简单的部署hexo的静态文件到github pages，但是如果在国内我们希望部署到github pages同时也部署到coding，然后通过dns双线路由，另外，我们可能有多个账号，比如公司的和个人的博客或者网站，也是同时部署到coding和github，那就这个github action解决不了，下面我们改造一下，使其达到这个目标：</p>
 <ol>
 <li>hexo的source存放在独立库</li>
 <li>生成的静态文件存在独立的库</li>
@@ -124,68 +129,33 @@
 
 
 <h1 id="how"><a href="#how" class="headerlink" title="how"></a>how</h1><h2 id="改造-entrypoint-sh"><a href="#改造-entrypoint-sh" class="headerlink" title="改造 entrypoint.sh"></a>改造 <code>entrypoint.sh</code></h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -e</span><br><span class="line"></span><br><span class="line"><span class="comment"># setup ssh-private-key</span></span><br><span class="line">mkdir -p /root/.ssh/</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"<span class="variable">$INPUT_DEPLOY_KEY</span>"</span> &gt; /root/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">chmod 600 /root/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">ssh-keyscan -t rsa github.com &gt;&gt; /root/.ssh/known_hosts</span><br><span class="line">ssh-keyscan -t rsa e.coding.net &gt;&gt; /root/.ssh/known_hosts</span><br><span class="line"></span><br><span class="line"><span class="comment"># you can change here to router domain with defferent key with you need</span></span><br><span class="line">cat &lt;&lt; EOF &gt; /root/.ssh/config</span><br><span class="line">Host github.com  </span><br><span class="line">    HostName github.com  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /root/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">Host <span class="variable">$GITHUB_ACTOR</span>.github.com  </span><br><span class="line">    HostName github.com  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /root/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">Host e.coding.net  </span><br><span class="line">    HostName e.coding.net  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /root/.ssh/id_rsa </span><br><span class="line"></span><br><span class="line">Host <span class="variable">$GITHUB_ACTOR</span>.coding.net  </span><br><span class="line">    HostName e.coding.net  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /root/.ssh/id_rsa </span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">chmod 600 /root/.ssh/config</span><br><span class="line"></span><br><span class="line"><span class="comment"># setup deploy git account</span></span><br><span class="line">git config --global user.name <span class="string">"<span class="variable">$INPUT_USER_NAME</span>"</span></span><br><span class="line">git config --global user.email <span class="string">"<span class="variable">$INPUT_USER_EMAIL</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># install hexo env</span></span><br><span class="line">npm install hexo-cli -g</span><br><span class="line">npm install hexo-deployer-git --save</span><br><span class="line"></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/<span class="variable">$GITHUB_ACTOR</span>/<span class="variable">$GITHUB_ACTOR</span>.github.io.git .deploy_git</span><br><span class="line"><span class="built_in">echo</span> <span class="string">'have clone .deploy_git'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># npm remove node-sass hexo-renderer-scss</span></span><br><span class="line"><span class="comment"># npm install hexo-renderer-scss</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># deployment</span></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$INPUT_COMMIT_MSG</span>"</span> == <span class="string">""</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    hexo g -d</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    hexo g -d -m <span class="string">"<span class="variable">$INPUT_COMMIT_MSG</span>"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> ::<span class="built_in">set</span>-output name=notify::<span class="string">"Deploy complate."</span></span><br></pre></td></tr></table></figure>
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/2020/06/21/hello-world/">Hello World</a>
-        </h1>
-
-      <div class="post-meta">
-        <span class="post-time">
-          2020-06-21
-        </span><span class="post-visits"
-             data-url="/2020/06/21/hello-world/"
-             data-title="Hello World">
-          阅读次数 0
-        </span>
-        </div>
-    </header>
-
-    <div class="post-content"><p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-        </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/2020/06/19/618-ecs/">阿里云618活动升级成拼团了</a>
-        </h1>
-
-      <div class="post-meta">
-        <span class="post-time">
-          2020-06-19
-        </span><span class="post-category">
-            <a href="/categories/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
-            </span>
-        <span class="post-visits"
-             data-url="/2020/06/19/618-ecs/"
-             data-title="阿里云618活动升级成拼团了">
-          阅读次数 0
-        </span>
-        </div>
-    </header>
-
-    <div class="post-content"><blockquote>
-<p>此文始发于我的知乎<a href="https://zhuanlan.zhihu.com/p/149232379" target="_blank" rel="noopener">专栏</a>,特此说明 </p>
-</blockquote>
-<p>刚刚收到阿里云发的短信，说618活动升级，点进去一看是<a href="https://www.aliyun.com/activity/groupbuy/618/share?ptCode=MTA1NjUyMzIwOTU1ODI1MHx8MTEwfDE%3D&userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">拼团活动</a>，拼团的价格比之前还要低，之前2核4G是320/年，现在开始是301/年，3年从960跌到了904. <a href="https://blog.csdn.net/youlin/article/details/106797052" target="_blank" rel="noopener">之前我已经对比过</a>，阿里在这次活动里优惠力度比另外两家还有大，现在竟然还继续降价。虽然还是“但见新人笑那闻旧人哭”系列，但是阿里对于拉新可以说非常上心。<br><img src="https://img-blog.csdnimg.cn/20200618171302320.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>于是，赶紧弄了个拼团链接分享给大家</p>
-<p><a href="https://www.aliyun.com/activity/groupbuy/618/share?ptCode=MTA1NjUyMzIwOTU1ODI1MHx8MTEwfDE%3D&userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">618 拼团分享页</a><br>​<br>看来我之前的判断没错，根据前段时间阿里云的市场报告，阿里云的收入在下降，阿里云目前的市场被腾讯云和华为云用低价格抢了不少，已经感受到了压力，现在加大力度圈地。</p>
-<p>可以预见，随着腾讯云和华为云的崛起，主打性价比的策略奏效后，阿里以后加大力度和对手抢新客户，对于针对新客户的优惠应该会持续下去，而且应该非常有竞争力。</p>
-          <div class="read-more">
-            <a href="/2020/06/19/618-ecs/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <nav class="pagination"></nav></section></div></div>
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="http://yoursite.com">John Doe</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="http://yoursite.com/2020/06/25/hexo-action-deploy-to-coding-and-multi-account/">http://yoursite.com/2020/06/25/hexo-action-deploy-to-coding-and-multi-account/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        <div class="post-tags">
+            <a href="/tags/hexo/">hexo</a>
+            <a href="/tags/github-action/">github action</a>
+            </div>
+        
+        <nav class="post-nav"><a class="next" href="/2020/06/21/hello-world/">
+        <span class="next-text nav-default">Hello World</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
       </main>
 
       <footer id="footer" class="footer"><div class="social-links"><a href="mailto:your@email.com" class="iconfont icon-email" title="email"></a>
