@@ -96,33 +96,35 @@
         <div class="content-wrapper">
           <div id="content" class="content"><section id="posts" class="posts"><article class="post">
     <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/2020/07/01/hello-world/">Hello World</a>
+      <h1 class="post-title"><a class="post-link" href="/2020/07/01/deepin-vbox-linux-additions-install/">deepin + virtual box 安装增强扩展失败的问题修复</a>
         </h1>
 
       <div class="post-meta">
         <span class="post-time">
           2020-07-01
-        </span><span class="post-visits"
-             data-url="/2020/07/01/hello-world/"
-             data-title="Hello World">
+        </span><span class="post-category">
+            <a href="/categories/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
+            <a href="/categories/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">开发环境</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/07/01/deepin-vbox-linux-additions-install/"
+             data-title="deepin + virtual box 安装增强扩展失败的问题修复">
           阅读次数 0
         </span>
         </div>
     </header>
 
-    <div class="post-content"><p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+    <div class="post-content"><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>在ubuntu desktop里面用virutalbox来安装deepin，然后如果希望宿主机和虚拟机之间可以进行内容的copy/paste，需要安装扩展。</p>
+<p>一般来说，如果在windows下，直接在virtualbox里面执行安装功能，virtualbox会直接下载然后完成安装，但是ubuntu下安装deepin如果直接执行操作，virtualbox也会去下载扩展的安装包，但是下载完后，安装的时候，会报找不到扩展的安装包。而且之后重启你会发现不能正常进入deepin系统。</p>
+<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><ol>
+<li>在deepin的启动界面，选择进入修复模式</li>
+<li>进入后系统后，打开终端，执行下面命令</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install console-setup plymouth-themes</span><br><span class="line">sudo sh /media/&#123;host user&#125;/VBox_GAs_5.2.34/VBoxLinuxAdditions.run</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+<p>说明： console-setup和plymouth-themes安装扩展的时候需要的依赖，需要先安装</p>
+<p>如能正常完成安转，安转完后，重启虚拟机，就可以进入系统了。</p>
+<h2 id="one-more-thing"><a href="#one-more-thing" class="headerlink" title="one more thing"></a>one more thing</h2><p>另外，需要提醒一点的是，如果用virtualbox来做跑虚拟机，最好定期或者在做重大操作的时候做好<code>系统快照</code>备份</p>
 
         </div></article>
       <article class="post">
@@ -165,7 +167,8 @@
         <span class="post-time">
           2020-06-19
         </span><span class="post-category">
-            <a href="/categories/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
+            <a href="/categories/%E9%98%BF%E9%87%8C%E4%BA%91/">阿里云</a>
+            <a href="/categories/%E9%98%BF%E9%87%8C%E4%BA%91/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
             </span>
         <span class="post-visits"
              data-url="/2020/06/19/618-ecs/"
@@ -175,11 +178,8 @@
         </div>
     </header>
 
-    <div class="post-content"><blockquote>
-<p>此文始发于我的知乎<a href="https://zhuanlan.zhihu.com/p/149232379" target="_blank" rel="noopener">专栏</a>,特此说明 </p>
-</blockquote>
-<p>刚刚收到阿里云发的短信，说618活动升级，点进去一看是<a href="https://www.aliyun.com/activity/groupbuy/618/share?ptCode=MTA1NjUyMzIwOTU1ODI1MHx8MTEwfDE%3D&userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">拼团活动</a>，拼团的价格比之前还要低，之前2核4G是320/年，现在开始是301/年，3年从960跌到了904. <a href="https://blog.csdn.net/youlin/article/details/106797052" target="_blank" rel="noopener">之前我已经对比过</a>，阿里在这次活动里优惠力度比另外两家还有大，现在竟然还继续降价。虽然还是“但见新人笑那闻旧人哭”系列，但是阿里对于拉新可以说非常上心。<br><img src="https://img-blog.csdnimg.cn/20200618171302320.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>于是，赶紧弄了个拼团链接分享给大家</p>
-<p><a href="https://www.aliyun.com/activity/groupbuy/618/share?ptCode=MTA1NjUyMzIwOTU1ODI1MHx8MTEwfDE%3D&userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">618 拼团分享页</a><br>​<br>看来我之前的判断没错，根据前段时间阿里云的市场报告，阿里云的收入在下降，阿里云目前的市场被腾讯云和华为云用低价格抢了不少，已经感受到了压力，现在加大力度圈地。</p>
+    <div class="post-content"><p>刚刚收到阿里云发的短信，说618活动升级，点进去一看是<a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">拼团活动</a>，拼团的价格比之前还要低，之前2核4G是320/年，现在开始是301/年，3年从960跌到了904. <a href="https://blog.csdn.net/youlin/article/details/106797052" target="_blank" rel="noopener">之前我已经对比过</a>，阿里在这次活动里优惠力度比另外两家还有大，现在竟然还继续降价。虽然还是“但见新人笑那闻旧人哭”系列，但是阿里对于拉新可以说非常上心。<br><img src="https://img-blog.csdnimg.cn/20200618171302320.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt=""><br>于是，赶紧弄了个拼团链接分享给大家</p>
+<p><a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">618 拼团分享页</a><br>​<br>看来我之前的判断没错，根据前段时间阿里云的市场报告，阿里云的收入在下降，阿里云目前的市场被腾讯云和华为云用低价格抢了不少，已经感受到了压力，现在加大力度圈地。</p>
 <p>可以预见，随着腾讯云和华为云的崛起，主打性价比的策略奏效后，阿里以后加大力度和对手抢新客户，对于针对新客户的优惠应该会持续下去，而且应该非常有竞争力。</p>
           <div class="read-more">
             <a href="/2020/06/19/618-ecs/" class="read-more-link">阅读更多</a>
