@@ -188,7 +188,7 @@
 <h1 id="配置hexo的deploy"><a href="#配置hexo的deploy" class="headerlink" title="配置hexo的deploy"></a>配置hexo的deploy</h1><p>找到hexo根目录的_config.yml,然后配置deploy字段的内容如下</p>
 <figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">'git'</span></span><br><span class="line">  <span class="attr">repo:</span> </span><br><span class="line">    <span class="attr">github:</span> <span class="string">'git@noosphere-coder.github.com:noosphere-coder/noosphere-coder.github.io.git'</span></span><br><span class="line">    <span class="attr">coding:</span> <span class="string">'git@e.coding.net:noosphere/noosphere.git'</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">'master'</span></span><br></pre></td></tr></table></figure>
 <p>这个配置目标是让我们直接<code>hexo deploy</code>可以同时推送到 github 和 coding 的 pages 仓库</p>
-<h2 id="配置-hexo-deploy命令支持多个github和coding账号"><a href="#配置-hexo-deploy命令支持多个github和coding账号" class="headerlink" title="配置 hexo deploy命令支持多个github和coding账号"></a>配置 hexo deploy命令支持多个github和coding账号</h2><p>一般来说，如果我只有一个github的账号，在这个配置下直接执行<code>hexo g -d</code>，一个命令就可以直接完成两个仓库的部署了。 </p>
+<h2 id="配置-hexo-deploy命令自持多个github和coding账号"><a href="#配置-hexo-deploy命令自持多个github和coding账号" class="headerlink" title="配置 hexo deploy命令自持多个github和coding账号"></a>配置 hexo deploy命令自持多个github和coding账号</h2><p>一般来说，如果我只有一个github的账号，在这个配置下直接执行<code>hexo g -d</code>，一个命令就可以直接完成两个仓库的部署了。 </p>
 <p>那么如果我们的github账号有多个，比如有一个办公用的，一个私人的，那怎么办？<br>我们知道 git 的 ssh 推送方式是需要使用特定的 key 的， 所以，我们只需要配置 ssh 去路由特定的域名到key即可.</p>
 <p>根据需求，在配置这个ssh key的路由之前，我们要先生成一个key用于做pages部署</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen noosphere-coder</span><br></pre></td></tr></table></figure>
@@ -202,7 +202,7 @@
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git remote <span class="built_in">set</span>-url origin git@noosphere-coder.github.com:noosphere-coder/hexo-action.git</span><br></pre></td></tr></table></figure>
 
 <p>coding项目也如法炮制即可。</p>
-<p>截止目前，你用<code>hexo g -d</code>就可以用不同的账号推送到github和coding了。</p>
+<p>截止目前，用你用<code>hexo g -d</code>就可以用不同的账号推送到github和coding了。</p>
 <h1 id="配置github-CI-Actions"><a href="#配置github-CI-Actions" class="headerlink" title="配置github CI Actions"></a>配置github CI Actions</h1><p>上面章节，我们配置了git和hexo，完成了通过一个 <code>hexo g -d</code>的命令直接推送到github和coding，并支持多个账号。 </p>
 <p><code>hexo g</code>是在本地生成静态文件，我们的source文件的仓库一般是放在github，然后配置为私有仓库，保证安全性，所以，我们接下来配置github CI actions，来达到直接直接用<code>git push</code>来触发<code>hexo g -d</code>，也就是，当我们<code>git push</code>的时候，CI自动生成静态文件，然后自动推送到github和coding的静态pages仓库。</p>
 <p>下面我们来看看最终的CI action的配置，然后再来解释</p>
@@ -232,7 +232,7 @@
 </ol>
 <p>然后把本地的<code>/home/$USER/.ssh/noosphere-coder</code>的内容复制进去即可。</p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ol>
-<li><p>通过以上<code>折腾</code>，我们完成了一个比较优雅的hexo部署方式，既可以直接用在本地一条命令<code>hexo g -d</code>直接部署到github和coding，也可以通过<code>git push</code>来触发这个同时部署，而且github和coding的静态pages的仓库配置只需要在hexo的_config.yml配置一次就可以了。</p>
+<li><p>通过以<code>折腾</code>，我们完成了一个比较优雅的hexo部署方式，既可以直接用在本地一条命令<code>hexo g -d</code>直接部署到github和coding，也可以通过<code>git push</code>来触发这个同时部署，而且github和coding的静态pages的仓库配置只需要在hexo的_config.yml配置一次就可以了。</p>
 </li>
 <li><p>同时，我们这个方法支持在机器上使用多个github或者coding账号，可以区分同时拥有如办公和私人账号的这类情况</p>
 </li>
