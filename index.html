@@ -128,6 +128,93 @@
         <div class="content-wrapper">
           <div id="content" class="content"><section id="posts" class="posts"><article class="post">
     <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/07/13/understanding-k8s-flannel-networking/">理解k8s的Flannel网络</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-07-13
+        </span><span class="post-category">
+            <a href="/categories/k8s/">k8s</a>
+            <a href="/categories/k8s/%E4%BA%91%E6%9C%8D%E5%8A%A1/">云服务</a>
+            <a href="/categories/k8s/%E4%BA%91%E6%9C%8D%E5%8A%A1/docker/">docker</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/07/13/understanding-k8s-flannel-networking/"
+             data-title="理解k8s的Flannel网络">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><blockquote>
+<p>此文始发于我的简书博客: <a href="https://www.jianshu.com/p/2f91907b2aba" target="_blank" rel="noopener">k8s的Flannel网络</a>,特此声明</p>
+</blockquote>
+<blockquote>
+<p>引: 之前写过一篇文章介绍<a href="https://www.jianshu.com/p/0330bd150d1a" target="_blank" rel="noopener">如何管理linux设备上的bridge(网桥)和docker bridge</a>, 今天我们来看看k8s的网络模型。</p>
+</blockquote>
+<p>我们先来看图示例，下面则个是k8s的网络模型图。</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTUyMWUzYTJiNmM2YmVlMTMucG5n?x-oss-process=image/format,png" alt="k8s的网络模型"></p>
+<p>我们知道，在k8s里面最小的管理单元是pod，一个主机可以跑多个pod，一个pod里面可以跑多个容器。</p>
+<p>如上面所示，一个pod里面所有的容器共享一个网络命名空间(network namespace)，所以，pod里面的容器之间通信，可以直接通过localhost来完成，pod里面的容器之间通过localhost+端口的方式来通信（这和应用程序在宿主机的通信方式是一样的）。</p>
+<p>那么pod和pod之间的通信呢？通常来说，我们给应用程序定死端口会给应用程序水平扩展带来很多不便，所以k8s不会使用定死端口这样的方法，而是采用其他方法来解决pod之间寻址的问题</p>
+<p>每个pod都会有一个自己的ip，可以将Pod像VM或物理主机一样对待。这样pod和pod之间的通信就不需要像容器一样，通过内外端口映射来通信了，这样就避免了端口冲突的问题。</p>
+<p>特殊的情况下（比如运维做网络检测或者程序调试），可以在pod所在的宿主机想向pod的ip+端口发起请求，这些请求会转发到pod的端口，但是pod本身它自己是不知道端口的存在的。</p>
+<p>因此，k8s的网络遵循以下原则：</p>
+<ul>
+<li>一个节点的pod和其他节点的pod通信不需要通过做网络地址转换（NAT）</li>
+<li>一个节点上所有的agent控制程序（如deamon和kubelet）可以和这个节点上的pod通信</li>
+<li>节点主机网络中的Pod可以与其他所有节点上的所有Pod通信，而无需NAT</li>
+</ul>
+<p>把上面这个pod替换成容器也是成立的，因为pod里面的容器和pod共享网络。</p>
+<p>基本上的原则就是，k8s的里面的pod可以自由的和集群里面的任何其他pod通信（即使他们是部署在不同的宿主机），而且pod直接的通信是直接使用pod自己的ip来通信，他们不知道宿主机的ip，所以，对于pod之间来说，宿主机的网络信息是透明的，好像不存在一样。</p>
+<p>然后，定了这几个原则之后，具体的实现k8s的这个网络模型有好多种实现，我们这里介绍的是<a href="https://github.com/coreos/flannel#flannel" target="_blank" rel="noopener">Flannel</a>，是其中最简单的一种实现。</p>
+<p>Flannel实现pod之间的通信，是通过一种覆盖网络（overlay network），把数据包封装在另外一个网络来做转发，这个覆盖网络可以给每一个pod分配一个独立的ip地址，使他们看起来都是一台具有独立ip的物理主机一样。</p>
+<p>下面这个就是k8s用覆盖网络来实现的一个例子：</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTEzYzY4MzA3NTA5YmZjOGYucG5n?x-oss-process=image/format,png" alt="flannel覆盖网络"></p>
+<p>可以看到有3个node，在多个node上建立一个覆盖网络，子网网段是100.95.0.0/16,然后，最终到容器级别，每个容器在这个网段里面获取到一个独立的ip。而宿主机所在的局域网络的网段是172.20.32.0/19</p>
+<p>看这两个网段，就知道，fannel给这个集群创建了一个更大的网络给pod使用，可以容纳的主机数量达到65535（2^16）个。</p>
+<p>对于每个宿主机，fannel给每个了一个小一点的网络100.96.x.0/24，提供给每个这个宿主机的每一个pod使用，也就是说，每一个宿主机可以有256(2^8)个pod。docker默认的网桥docker0用的就是这个网络，也就是所有的docker通过docker0来使用这个网络。即使说，对于容器来说，都是通过docker0这个桥来通信，和我们平常单机的容器是一样的（如果你不给创建的容器指定网络的话，默认用的是docker0，参考我以前写的关于<a href="https://www.jianshu.com/p/0330bd150d1a" target="_blank" rel="noopener">docker bridge</a>的文章）</p>
+<p>那么，对于同一个host里面的容器通信，我们上面说了是通过这个台宿主机的里面的docker0这个网桥来通信。那对于跨宿主机，也即是两个宿主机之间的容器是怎么通信的呢？fannel使用了宿主机操作系统的kernel route和UDP（这是其中一种实现）包封装来完成。下图演示了这个通信过程：</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTE3ZWQyY2Y2MTlkMjdjNDQucG5n?x-oss-process=image/format,png" alt="fannel网络中跨宿主机的容器通信"></p>
+<p>如图所示，100.96.1.2(container-1) 要和100.96.2.3(container-2)通信，两个容器分别处于不同的宿主机。<br>假设有一个包是从100.96.1.2发出去给100.96.2.3，它会先经过docker0，因为docker0这个桥是所有容器的网关。 然后这个包会经过route table处理，转发出去到局域网172.20.32.0/19.  而这个route table的对应处理这类包的规则又是从哪里来的呢？它们是由fannel的一个守护程序flanneld创建的。</p>
+<p>每一台宿主机都会跑一个flannel的deamon的进程，这个进程的程序会往宿主机的route table里面写入特定的路由规则，这个规则大概是这样的。</p>
+<p>Node1的route table</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">admin@ip-172-20-33-102:~$ ip route</span><br><span class="line">default via 172.20.32.1 dev eth0</span><br><span class="line">100.96.0.0&#x2F;16 dev flannel0  proto kernel  scope link  src 100.96.1.0</span><br><span class="line">100.96.1.0&#x2F;24 dev docker0  proto kernel  scope link  src 100.96.1.1</span><br><span class="line">172.20.32.0&#x2F;19 dev eth0  proto kernel  scope link  src 172.20.33.102</span><br></pre></td></tr></table></figure>
+
+<p>图例的数据包发出去的目标地址是100.96.2.3,它属于网段100.96.0.0/16,这个目标地址命中第二条规则，也就是这个包会发到flannel0这个设备（dev），这<code>flannel0</code>是一个TUN设备。是在内核里面的一个<a href="https://segmentfault.com/a/1190000009249039" target="_blank" rel="noopener">虚拟网络设备（虚拟网卡）</a>。</p>
+<p>在内核（kernel）里面，有两种虚拟网卡设备，分别是TUN和TAP,其中TAP处理的是第二层（数据链路层）的帧，而TUN处理的是第三层（网络层）的ip包。</p>
+<p>应用程序可以绑定到TUN和TAP设备，内核会把数据通过TUN或者TAP设备发送给这些程序，反过来，应用程序也可以通过TUN和TAP向内核写入数据，进而由内核的路由处理这些发出去的数据包。</p>
+<p>那么上面这个<code>flannel0</code>就是一个这样的TUN设备。这个设备连到的是一个flannel的守护进程程序<code>flanneld</code></p>
+<p>而这个<code>flanneld</code>是干嘛的呢？它可以接受所有发往<code>flannel0</code>这个设备的数据包，然后做数据封装处理，它的封装的逻辑也很简单，就是根据<code>目标地址</code>，找到这个这地址对应的在整个flannel网络里面对应<code>物理ip和端口</code>（这里是Node2对应的物理ip），然后增加一个包头，增加的包头里面<code>目标地址</code>为这个<code>实际的物理ip和端口</code>（当然源地址也改成了局域网络的ip），将原来的数据包嵌入在新的数据包中，然后再把这个封装后的包扔回去给内核，内核根据目标地址去路由规则匹配规则，发现目标地址ip是172.20.54.98,端口是8285. 根据ip匹配不到任何特定的规则，就用第一条default（默认）的规则，通过eth0这个物理网卡，把数据包发给局域网（这里是UDP广播出去）</p>
+<p>当Node2的收到这个包后，然后根据<code>端口8285</code>发现他的目标地址原来是发给flanneld的，然后就直接交给flanneld这程序，flanneld收到包后，把包头去掉，发现原来目标地址是100.96.2.3，然后就交换flannel0，flannel0把这个解开后的原包交给内核，内核发现它的目标地址是100.96.2.3，应该交给docker0来处理。（图例里面画的是直接由flannel0交给docker0，没有图示出内核，实际上flannel0是一个TUN设备，是跑在内核的，数据经过它后可以交给内核，由内核根据路由决定进一步怎么forward）</p>
+<p>以上就是这个通信的过程，那么这里有一个问题： flanneld是怎么知道100.96.2.3对应的目标地址是172.20.54.98:8285的呢？</p>
+<p>这是因为flanneld维护了一个映射关系，它没创造一个虚拟的容器ip（分配给容器新ip的时候），它就知道这个容器的ip实际上是在哪台宿主机上，然后把这个映射关系存储起来，在k8s里面flanneld存储的这个映射关系放在etd上，这就是为什么flanneld为什么知道这个怎么去封装这些包了，下面就是etcd里面的数据的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">admin@ip-172-20-33-102:~$ etcdctl ls &#x2F;coreos.com&#x2F;network&#x2F;subnets</span><br><span class="line">&#x2F;coreos.com&#x2F;network&#x2F;subnets&#x2F;100.96.1.0-24</span><br><span class="line">&#x2F;coreos.com&#x2F;network&#x2F;subnets&#x2F;100.96.2.0-24</span><br><span class="line">&#x2F;coreos.com&#x2F;network&#x2F;subnets&#x2F;100.96.3.0-24</span><br><span class="line">admin@ip-172-20-33-102:~$ etcdctl get &#x2F;coreos.com&#x2F;network&#x2F;subnets&#x2F;100.96.2.0-24</span><br><span class="line">&#123;&quot;PublicIP&quot;:&quot;172.20.54.98&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看上面这个数据，etcd里面存储的100.96.2.0-24这个网段的容器是放在172.20.54.98这台宿主机上的。</p>
+<p>那么还有一个问题，端口8285又是怎么知道的? </p>
+<p>这个很简单，flanneld的默认监听的端口就是这个8285端口，flanneld启动的时候，就监听了UDP端口8285. 所以发给Node2：8285的所有UDP数据包会，flanneld这个进程会直接处理，如何去掉包头就还原出来原来的包了，还原后交给TUN设备flannel0,由flannel0交给内核，内核根据Node2的路由规则交给docker0（Node2的路由规则和node1是基本上一样的，除了第三位的网段标识不一样，一个是100.96.1一个是100.92.2）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">admin@ip-172-20-54-98:~$ ip route</span><br><span class="line">default via 172.20.32.1 dev eth0</span><br><span class="line">100.96.0.0&#x2F;16 dev flannel0  proto kernel  scope link  src 100.96.2.0</span><br><span class="line">100.96.2.0&#x2F;24 dev docker0  proto kernel  scope link  src 100.96.2.1</span><br><span class="line">172.20.32.0&#x2F;19 dev eth0  proto kernel  scope link  src 172.20.54.98</span><br></pre></td></tr></table></figure>
+
+<p>看Node2的这个规则，flannld去掉包头解出来的原包的目标ip是100.96.2.3,由flannel0交回去给kennel，kennel发现命中第三条规则，所以会把这个包叫给docker0,继而就进入了docker0这个桥的子网了，接下去就是docker的事情了，<a href="https://www.jianshu.com/p/0330bd150d1a" target="_blank" rel="noopener">参考以前写的文章</a>。</p>
+<p>最后一个问题，怎么配置docker去使用100.96.x.0/24这个子网呢，如果是手工创建容器的话，这个也是非常简单的，<a href="https://www.jianshu.com/p/0330bd150d1a" target="_blank" rel="noopener">参考以前写的关于docker bridge的这篇文章</a>，但是在k8s里面，是通过配置来实现的：</p>
+<p>flanneld会把子网信息写到一个配置文件<code>/run/flannel/subnet.env</code>里</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">admin@ip-172-20-33-102:~$ cat &#x2F;run&#x2F;flannel&#x2F;subnet.env</span><br><span class="line">FLANNEL_NETWORK&#x3D;100.96.0.0&#x2F;16</span><br><span class="line">FLANNEL_SUBNET&#x3D;100.96.1.1&#x2F;24</span><br><span class="line">FLANNEL_MTU&#x3D;8973</span><br><span class="line">FLANNEL_IPMASQ&#x3D;true</span><br></pre></td></tr></table></figure>
+
+<p>docker会使用这个配置的环境变了来作为它的bridge的配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dockerd --bip&#x3D;$FLANNEL_SUBNET --mtu&#x3D;$FLANNEL_MTU</span><br></pre></td></tr></table></figure>
+
+<p>以上，就是k8s如何使用flannel网络来跨机器通信的原理，总体来讲，由于flanneld这个守护神干了所有的脏活累活（其实已经是k8s的网络实现里面最简单的一种了），使得pod和容器能够连接另外一个pod或者容器变得非常简单，就像连一个大局域网里面任意以太主机一样，他们只需要知道对方的虚拟ip就可以直接通信了，不需要做<br>NAT等复杂的规则处理。</p>
+<p>那么性能怎么样？</p>
+<p>新版本的flannel不推荐在生产环境使用UDP的包封装这种实现。只用它来做测试和调试用，因为它的性能表现和其他的实现比差一些。</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLWY1OTFiMzk4MDQ4YTc1MTcucG5n?x-oss-process=image/format,png" alt="flannel0 利用的TUN设备做包封装原理"></p>
+<p>看上面这个图解，一个upd包需要来回在用户空间(user space)和内核空间(kennel space)复制3次，这会大大增加网络开销。</p>
+<p><a href="https://github.com/coreos/flannel/blob/master/Documentation/backends.md" target="_blank" rel="noopener">官方的文档</a>里面可以看到其他的包转发实现方式，可以进一步阅读,其中host-gw的性能比较好，它是在第二层去做数据包处理。</p>
+
+        </div></article>
+      <article class="post">
+    <header class="post-header">
       <h1 class="post-title"><a class="post-link" href="/2020/07/01/deepin-vbox-linux-additions-install/">deepin + virtual box 安装增强扩展失败的问题修复</a>
         </h1>
 
@@ -188,7 +275,7 @@
 <h1 id="配置hexo的deploy"><a href="#配置hexo的deploy" class="headerlink" title="配置hexo的deploy"></a>配置hexo的deploy</h1><p>找到hexo根目录的_config.yml,然后配置deploy字段的内容如下</p>
 <figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">'git'</span></span><br><span class="line">  <span class="attr">repo:</span> </span><br><span class="line">    <span class="attr">github:</span> <span class="string">'git@noosphere-coder.github.com:noosphere-coder/noosphere-coder.github.io.git'</span></span><br><span class="line">    <span class="attr">coding:</span> <span class="string">'git@e.coding.net:noosphere/noosphere.git'</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">'master'</span></span><br></pre></td></tr></table></figure>
 <p>这个配置目标是让我们直接<code>hexo deploy</code>可以同时推送到 github 和 coding 的 pages 仓库</p>
-<h2 id="配置-hexo-deploy命令自持多个github和coding账号"><a href="#配置-hexo-deploy命令自持多个github和coding账号" class="headerlink" title="配置 hexo deploy命令自持多个github和coding账号"></a>配置 hexo deploy命令自持多个github和coding账号</h2><p>一般来说，如果我只有一个github的账号，在这个配置下直接执行<code>hexo g -d</code>，一个命令就可以直接完成两个仓库的部署了。 </p>
+<h2 id="配置-hexo-deploy命令支持多个github和coding账号"><a href="#配置-hexo-deploy命令支持多个github和coding账号" class="headerlink" title="配置 hexo deploy命令支持多个github和coding账号"></a>配置 hexo deploy命令支持多个github和coding账号</h2><p>一般来说，如果我只有一个github的账号，在这个配置下直接执行<code>hexo g -d</code>，一个命令就可以直接完成两个仓库的部署了。 </p>
 <p>那么如果我们的github账号有多个，比如有一个办公用的，一个私人的，那怎么办？<br>我们知道 git 的 ssh 推送方式是需要使用特定的 key 的， 所以，我们只需要配置 ssh 去路由特定的域名到key即可.</p>
 <p>根据需求，在配置这个ssh key的路由之前，我们要先生成一个key用于做pages部署</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen noosphere-coder</span><br></pre></td></tr></table></figure>
@@ -202,7 +289,7 @@
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git remote <span class="built_in">set</span>-url origin git@noosphere-coder.github.com:noosphere-coder/hexo-action.git</span><br></pre></td></tr></table></figure>
 
 <p>coding项目也如法炮制即可。</p>
-<p>截止目前，用你用<code>hexo g -d</code>就可以用不同的账号推送到github和coding了。</p>
+<p>截止目前，你用<code>hexo g -d</code>就可以用不同的账号推送到github和coding了。</p>
 <h1 id="配置github-CI-Actions"><a href="#配置github-CI-Actions" class="headerlink" title="配置github CI Actions"></a>配置github CI Actions</h1><p>上面章节，我们配置了git和hexo，完成了通过一个 <code>hexo g -d</code>的命令直接推送到github和coding，并支持多个账号。 </p>
 <p><code>hexo g</code>是在本地生成静态文件，我们的source文件的仓库一般是放在github，然后配置为私有仓库，保证安全性，所以，我们接下来配置github CI actions，来达到直接直接用<code>git push</code>来触发<code>hexo g -d</code>，也就是，当我们<code>git push</code>的时候，CI自动生成静态文件，然后自动推送到github和coding的静态pages仓库。</p>
 <p>下面我们来看看最终的CI action的配置，然后再来解释</p>
@@ -232,7 +319,7 @@
 </ol>
 <p>然后把本地的<code>/home/$USER/.ssh/noosphere-coder</code>的内容复制进去即可。</p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ol>
-<li><p>通过以<code>折腾</code>，我们完成了一个比较优雅的hexo部署方式，既可以直接用在本地一条命令<code>hexo g -d</code>直接部署到github和coding，也可以通过<code>git push</code>来触发这个同时部署，而且github和coding的静态pages的仓库配置只需要在hexo的_config.yml配置一次就可以了。</p>
+<li><p>通过以上<code>折腾</code>，我们完成了一个比较优雅的hexo部署方式，既可以直接用在本地一条命令<code>hexo g -d</code>直接部署到github和coding，也可以通过<code>git push</code>来触发这个同时部署，而且github和coding的静态pages的仓库配置只需要在hexo的_config.yml配置一次就可以了。</p>
 </li>
 <li><p>同时，我们这个方法支持在机器上使用多个github或者coding账号，可以区分同时拥有如办公和私人账号的这类情况</p>
 </li>
