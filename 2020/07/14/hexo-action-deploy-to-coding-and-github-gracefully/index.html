@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="最优雅的将hexo到github和coding"/><meta name="keywords" content="阿里云，腾讯云，华为云，云主机，云服务器，对比，比较，评测" /><link rel="alternate" href="/default" title="Noosphere"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://noosphere.site/2020/07/14/hexo-action-deploy-to-coding-and-github-gracefully/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_analytics">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?438bb344f6f5031be90f213101b87127";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script><!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-170909162-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-170909162-1');
+</script><script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script src="//cdn1.lncld.net/static/js/3.1.1/av-min.js"></script>
+  <script id="leancloud">
+    AV.init({
+      appId: "AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz",
+      appKey: "GTE9k7Cyl9mtVbUHbvdIxXvc"
+    });
+  </script><script>
+  window.config = {"leancloud":{"app_id":"AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz","app_key":"GTE9k7Cyl9mtVbUHbvdIxXvc"},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>最优雅的将hexo到github和coding - Noosphere</title>
+  <meta name="generator" content="Hexo 4.2.1"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Noosphere</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a><a href="/archives/">
+        <li class="mobile-menu-item">归档
+          </li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签
+          </li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类
+          </li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Noosphere</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            归档
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/tags/">
+            标签
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/categories/">
+            分类
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/about/">
+            关于
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">最优雅的将hexo到github和coding
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-07-14
+        </span><span class="post-category">
+            <a href="/categories/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">开发环境</a>
+            <a href="/categories/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/hexo/">hexo</a>
+            <a href="/categories/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/hexo/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
+            <a href="/categories/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/hexo/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/%E4%BA%91%E4%B8%BB%E6%9C%BA/">云主机</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/07/14/hexo-action-deploy-to-coding-and-github-gracefully/"
+             data-title="最优雅的将hexo到github和coding">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-前言"><span class="toc-text">1. 前言</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-目标"><span class="toc-text">1.1 目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-已有的解决方案分析"><span class="toc-text">1.2 已有的解决方案分析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-正文"><span class="toc-text">2 正文</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-只实现目标1-5的配置"><span class="toc-text">2.1 只实现目标1-5的配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-可选-不需要可以跳过-实现目标6：使用独立的ssh-key来部署（也就是可以新建多个的github账号来部署你的hexo站点）"><span class="toc-text">2.2 [可选,不需要可以跳过] 实现目标6：使用独立的ssh key来部署（也就是可以新建多个的github账号来部署你的hexo站点）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-DNS双线配置"><span class="toc-text">3. DNS双线配置</span></a></li></ol></li></ol>
+    </div>
+  </div><div class="post-content"><h1 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h1><p>上次写了篇文章 <a href="/2020/06/25/hexo-action-deploy-to-coding-and-multi-account/" title="使用github action同时部署hexo到github和coding最优雅的方式(支持多github账号)">使用github action同时部署hexo到github和coding最优雅的方式(支持多github账号)</a>，从实现原理的角度做了介绍，由于实现的目标比较多，所以看起来比较复杂，这次我们不讲原理，仅仅按实现目标来介绍如何配置。</p>
+<h2 id="1-1-目标"><a href="#1-1-目标" class="headerlink" title="1.1 目标"></a>1.1 目标</h2><p>先说我们要实现的目标，然后再按目标来介绍方法</p>
+<ol>
+<li>hexo的source存放在独立私有库jiuhao</li>
+<li>生成的静态文件存放在github和coding独立的库</li>
+<li>本地可以通过 <code>hexo d -g</code>一个命令一次性部署到github和coding</li>
+<li>可以通过<code>git push</code>推送到github的surce仓库后，由action触发部署到github和coding的静态仓库 </li>
+<li>同时实现3和4，只需要配置一次<code>_config.yml</code>。而不需要在action里面写死目标静态仓库的地址，方便维护</li>
+<li>支持多个github账号，同时也支持多个coding账号</li>
+</ol>
+<p>说明：</p>
+<ul>
+<li>目标 1 把 source 放在独立的私有库是安全性考虑</li>
+<li>目标 3 和 4 是方便可以使用两种方法都能达到部署的目标， 3 是手工部署， 4 是通过<code>git push</code>触发，比如 github 的 action 可能某些原因失败了，暂时又没时间去维护，那么我可以直接在本地<code>hexo d -g</code>部署就行</li>
+<li>目标5是实现3和4的时候，两种方法的目标仓库(publish repo)地址配置只需要一处维护，不需要分散在 _config.yml 和 github action</li>
+<li>目标 6 是可选目标。 如果不需要区分工作和私人用的github 账号，可以不需要理会这个目标。</li>
+</ul>
+<h2 id="1-2-已有的解决方案分析"><a href="#1-2-已有的解决方案分析" class="headerlink" title="1.2 已有的解决方案分析"></a>1.2 已有的解决方案分析</h2><p>为了达到上面这些目标，我找了一轮市面上各种各样的解决方案，没看到完全符合要求的。主要问题包括</p>
+<ul>
+<li>github action market上的hexo action没有支持同时部署到github和coding的action可以直接重用</li>
+<li>github action market上已有的hexo action的deploy方式无非两种，一种是直接把目标(publish repo)仓库地址配置action，一种是直接使用source里面_config.yml的配置. 如果是前者，则意味着我们需要吧publish repo写在两个地方，一个是本地的_config.yml一个是action。维护起来比较麻烦。明显应该使用后者。</li>
+<li>其他的一些博客提到的方法里面，大多存在前面一点存在的问题，而且大多是直接在action里定制脚本，没有抽成action，不方便重用。</li>
+</ul>
+<p>就这样，观摩了一轮，我决定fork一个github mark上的hexo action出来，按需求自己弄一个action，经过考察，<code>[sma11black/hexo-action](https://github.com/sma11black/hexo-action)</code>这个action比较接近需求，只需要简单改造就可以使用，怎么改造这里就不说了，<a href="/2020/06/25/hexo-action-deploy-to-coding-and-multi-account/" title="见上一篇文章">见上一篇文章</a></p>
+<p>经过简单改造的action的仓库是 <code>[noosphere-coder/hexo-action@master](https://github.com/noosphere-coder/hexo-action)</code>,下面我们直接使用就好</p>
+<h1 id="2-正文"><a href="#2-正文" class="headerlink" title="2 正文"></a>2 正文</h1><h2 id="2-1-只实现目标1-5的配置"><a href="#2-1-只实现目标1-5的配置" class="headerlink" title="2.1 只实现目标1-5的配置"></a>2.1 只实现目标1-5的配置</h2><p>排除掉目标6，只需要是实现上面说的1-5的目标，也即是我们可以使用我们平时已经在github和coding里面使用的ssh key就好。那么配置很简单</p>
+<ol>
+<li>配置hexo的deploy</li>
+</ol>
+<p>找到hexo根目录的_config.yml,然后配置deploy字段的内容如下</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">'git'</span></span><br><span class="line">  <span class="attr">repo:</span> </span><br><span class="line">    <span class="attr">github:</span> <span class="string">'git@noosphere-coder.github.com:noosphere-coder/noosphere-coder.github.io.git'</span></span><br><span class="line">    <span class="attr">coding:</span> <span class="string">'git@e.coding.net:noosphere/noosphere.git'</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">'master'</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>配置github CI Actions</li>
+</ol>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="attr">name:</span> <span class="string">CI</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span> <span class="string">[</span> <span class="string">master</span> <span class="string">]</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span> <span class="string">[</span> <span class="string">master</span> <span class="string">]</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build-and-deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">container:</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">node:13-alpine</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v1</span></span><br><span class="line">      <span class="attr">with:</span></span><br><span class="line">        <span class="attr">submodules:</span> <span class="literal">true</span> </span><br><span class="line">    </span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">Dependencies</span></span><br><span class="line">      <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line">        <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">deploy</span></span><br><span class="line">      <span class="attr">uses:</span> <span class="string">noosphere-coder/hexo-action@master</span></span><br><span class="line">      <span class="attr">with:</span></span><br><span class="line">        <span class="attr">deploy_key:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.DEPLOY_KEY</span> <span class="string">&#125;&#125;</span></span><br><span class="line">        <span class="comment"># user_name: your github username  # (or delete this input setting to use bot account)</span></span><br><span class="line">        <span class="comment"># user_email: your github useremail  # (or delete this input setting to use bot account)</span></span><br><span class="line">        <span class="attr">commit_msg:</span> <span class="string">$&#123;&#123;</span> <span class="string">github.event.head_commit.message</span> <span class="string">&#125;&#125;</span>  </span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Get</span> <span class="string">the</span> <span class="string">output</span></span><br><span class="line">      <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line">        <span class="string">echo</span> <span class="string">"$<span class="template-variable">&#123;&#123; steps.deploy.outputs.notify &#125;&#125;</span>"</span></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>ssh key 配置<br>3.1 私钥配置: 把<code>/home/$USER/ssh/id_rsa</code>的内容复制出来，在入口： {私有库}-&gt;settings-&gt;Secrets-&gt;New secret，新建名为<code>DEPLOY_KEY</code>的key，加入id_rsa的内容<br>3.2 公钥配置: 把<code>/home/$USER/ssh/id_rsa.pub</code>分别配置在github和coding的目标仓库<ul>
+<li>github的配置入口是 {目标仓库}-&gt;settings-&gt;Deploy keys-&gt;add deploy keys</li>
+<li>coding的配置入口是 {目标仓库}-&gt;设置-&gt;部署公钥-&gt;新建部署公钥</li>
+</ul>
+</li>
+</ol>
+<p>至此，实现1-5目标的配置已经完成，也就是，我们可以分别用下面这两种方式都可以同时部署到github和coding</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo g -d <span class="comment"># 或者 hexo d -g</span></span><br></pre></td></tr></table></figure>
+<p>和</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push origin master</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-可选-不需要可以跳过-实现目标6：使用独立的ssh-key来部署（也就是可以新建多个的github账号来部署你的hexo站点）"><a href="#2-2-可选-不需要可以跳过-实现目标6：使用独立的ssh-key来部署（也就是可以新建多个的github账号来部署你的hexo站点）" class="headerlink" title="2.2 [可选,不需要可以跳过] 实现目标6：使用独立的ssh key来部署（也就是可以新建多个的github账号来部署你的hexo站点）"></a>2.2 [可选,不需要可以跳过] 实现目标6：使用独立的ssh key来部署（也就是可以新建多个的github账号来部署你的hexo站点）</h2><p>目标6是采用另外的ssh key，而不是直接使用<code>/home/$USER/ssh/id_rsa</code>,一般来说，这样作无非是这几种目的</p>
+<ol>
+<li>区分私人的id和工作用的key</li>
+<li>不要直接使用id_rsa,减少安全隐患</li>
+<li>同时维护多个隔离的hexo站点</li>
+</ol>
+<p>为了达到这个目的，我们需要需要告诉ssh，在碰到这个hexo的仓库的时候，请使用独立的 key。下面我们来实现这个目标</p>
+<ol>
+<li>生成独立的key用于部署（这里的key命名是nooshpere-coder）</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen noosphere-coder</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>告诉ssh进行路由, 在终端执行下面命令，生成一份config配置到<code>/home/$USER/.ssh</code>目录</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt; EOF &gt; /home/<span class="variable">$USER</span>/.ssh/config</span><br><span class="line">Host github.com  </span><br><span class="line">    HostName github.com  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">Host noosphere-coder.github.com  </span><br><span class="line">    HostName github.com  </span><br><span class="line">    PreferredAuthentications publickey </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/noosphere-coder</span><br><span class="line"></span><br><span class="line">Host e.coding.net  </span><br><span class="line">    HostName e.coding.net  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/id_rsa </span><br><span class="line"></span><br><span class="line">Host noosphere-coder.coding.net  </span><br><span class="line">    HostName e.coding.net  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/noosphere-coder</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>ssh key 配置，和上面的<code>ssh key 配置</code>配置步骤一样，只需要把id_rsa改成noosphere-coder的内容就行了。</p>
+</li>
+<li><p>把私有仓库的remote改掉</p>
+</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git remote <span class="built_in">set</span>-url origin git@noosphere-coder.github.com:noosphere-coder/hexo-action.git</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>以上 noosphere-coder请替换成你自己的仓库名称</p>
+</blockquote>
+<p>至此，目标6已经完成，这个时候，你再去执行<code>git push</code>的时候，ssh会自动使用独立的key而不会使用默认的id_rsa.</p>
+<h2 id="3-DNS双线配置"><a href="#3-DNS双线配置" class="headerlink" title="3. DNS双线配置"></a>3. DNS双线配置</h2><p>同时部署到github和coding主要是为了国内访问和国外访问流量区分，一个为了速度，二者为了搜索引擎收录（github封了百度的爬虫）</p>
+<p>这个配置，实在没什么好讲的，直接上图吧</p>
+<ol>
+<li>DSN服务商的控制面板配置</li>
+</ol>
+<p><img src="https://s1.ax1x.com/2020/07/14/UNGWhF.png" alt="DSN服务商的控制面板配置"></p>
+<ol start="2">
+<li>github的域名配置<br><img src="https://s1.ax1x.com/2020/07/14/UNKuxP.png" alt="github的域名配置"></li>
+<li>coding的的域名配置<br><img src="https://s1.ax1x.com/2020/07/14/UNdYvD.png" alt="coding的的域名配置"></li>
+</ol>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://noosphere.site">noosphere</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://noosphere.site/2020/07/14/hexo-action-deploy-to-coding-and-github-gracefully/">https://noosphere.site/2020/07/14/hexo-action-deploy-to-coding-and-github-gracefully/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <div class="post-reward">
+    <input type="checkbox" name="reward" id="reward" hidden />
+    <label class="reward-button" for="reward">赞赏支持</label>
+    <div class="qr-code"><label class="qr-code-image" for="reward">
+          <img class="image" src="/images/reward/wechat.png" title="wechat">
+          <br/>
+          <label>微信</label>
+        </label>
+      <label class="qr-code-image" for="reward">
+          <img class="image" src="/images/reward/alipay.png" title="alipay">
+          <br/>
+          <label>支付宝</label>
+        </label>
+      </div>
+  </div><footer class="post-footer">
+        <div class="post-tags">
+            <a href="/tags/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
+            <a href="/tags/hexo/">hexo</a>
+            <a href="/tags/github-action/">github action</a>
+            </div>
+        
+        <nav class="post-nav"><a class="next" href="/2020/07/01/deepin-vbox-linux-additions-install/">
+        <span class="next-text nav-default">deepin + virtual box 安装增强扩展失败的问题修复</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"><div id="gitalk-container"></div>
+    </div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="https://github.com/noosphere-coder" target="_blank" rel="noopener" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even" target="_blank" rel="noopener">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2020<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">noosphere</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css"/>
+
+
+<script src="//cdn.jsdelivr.net/npm/js-md5@0.7.3/src/md5.min.js"></script>
+
+<script>
+  var gitalk = new Gitalk({
+    clientID: '6cc970aab706e685584e',
+    clientSecret: '3b5906d70b4f6a6460bc184aa0dd49822717e06e',
+    repo: 'noosphere-coder.github.io',
+    owner: 'noosphere-coder',
+    admin: ['noosphere-coder'],
+    id: md5(location.pathname),
+    
+      language: 'zh-CN',
+    
+    distractionFreeMode: 'true'
+  });
+  gitalk.render('gitalk-container');
+</script><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>
