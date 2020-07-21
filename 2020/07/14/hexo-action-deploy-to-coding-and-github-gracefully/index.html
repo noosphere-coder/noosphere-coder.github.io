@@ -168,9 +168,10 @@
 <li>目标 1 把 source 放在独立的私有库是安全性考虑</li>
 <li>目标 3 和 4 是方便可以使用两种方法都能达到部署的目标， 3 是手工部署， 4 是通过<code>git push</code>触发，比如 github 的 action 可能某些原因失败了，暂时又没时间去维护，那么我可以直接在本地<code>hexo d -g</code>部署就行</li>
 <li>目标5是实现3和4的时候，两种方法的目标仓库(publish repo)地址配置只需要一处维护，不需要分散在 _config.yml 和 github action</li>
-<li>目标 6 是可选目标。 如果不需要区分工作和私人用的github 账号，可以不需要理会这个目标。</li>
+<li>目标 6 是可选目标。 如果不需要区分工作和私人用的github 账号，可以不需要理会这个目标。<a id="more"></a>
+<h2 id="1-2-已有的解决方案分析"><a href="#1-2-已有的解决方案分析" class="headerlink" title="1.2 已有的解决方案分析"></a>1.2 已有的解决方案分析</h2></li>
 </ul>
-<h2 id="1-2-已有的解决方案分析"><a href="#1-2-已有的解决方案分析" class="headerlink" title="1.2 已有的解决方案分析"></a>1.2 已有的解决方案分析</h2><p>为了达到上面这些目标，我找了一轮市面上各种各样的解决方案，没看到完全符合要求的。主要问题包括</p>
+<p>为了达到上面这些目标，我找了一轮市面上各种各样的解决方案，没看到完全符合要求的。主要问题包括</p>
 <ul>
 <li>github action market上的hexo action没有支持同时部署到github和coding的action可以直接重用</li>
 <li>github action market上已有的hexo action的deploy方式无非两种，一种是直接把目标(publish repo)仓库地址配置action，一种是直接使用source里面_config.yml的配置. 如果是前者，则意味着我们需要吧publish repo写在两个地方，一个是本地的_config.yml一个是action。维护起来比较麻烦。明显应该使用后者。</li>

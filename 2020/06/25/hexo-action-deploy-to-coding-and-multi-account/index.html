@@ -157,6 +157,7 @@
 <li>同一份hexo source库，只需要配置一次hexo的<code>_config.yml</code>，就可以直接通过<code>hexo deploy -g</code> 或者<code>git push</code>来触发部署</li>
 <li>支持多个github账号，同时也支持多个coding账号</li>
 </ol>
+<a id="more"></a>
 <h1 id="配置hexo的deploy"><a href="#配置hexo的deploy" class="headerlink" title="配置hexo的deploy"></a>配置hexo的deploy</h1><p>找到hexo根目录的_config.yml,然后配置deploy字段的内容如下</p>
 <figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">'git'</span></span><br><span class="line">  <span class="attr">repo:</span> </span><br><span class="line">    <span class="attr">github:</span> <span class="string">'git@noosphere-coder.github.com:noosphere-coder/noosphere-coder.github.io.git'</span></span><br><span class="line">    <span class="attr">coding:</span> <span class="string">'git@e.coding.net:noosphere/noosphere.git'</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">'master'</span></span><br></pre></td></tr></table></figure>
 <p>这个配置目标是让我们直接<code>hexo deploy</code>可以同时推送到 github 和 coding 的 pages 仓库</p>

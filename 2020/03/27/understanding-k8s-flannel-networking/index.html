@@ -157,6 +157,7 @@
 <p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTUyMWUzYTJiNmM2YmVlMTMucG5n?x-oss-process=image/format,png" alt="k8s的网络模型"></p>
 <p>我们知道，在k8s里面最小的管理单元是pod，一个主机可以跑多个pod，一个pod里面可以跑多个容器。</p>
 <p>如上面所示，一个pod里面所有的容器共享一个网络命名空间(network namespace)，所以，pod里面的容器之间通信，可以直接通过localhost来完成，pod里面的容器之间通过localhost+端口的方式来通信（这和应用程序在宿主机的通信方式是一样的）。</p>
+<a id="more"></a>
 <p>那么pod和pod之间的通信呢？通常来说，我们给应用程序定死端口会给应用程序水平扩展带来很多不便，所以k8s不会使用定死端口这样的方法，而是采用其他方法来解决pod之间寻址的问题</p>
 <p>每个pod都会有一个自己的ip，可以将Pod像VM或物理主机一样对待。这样pod和pod之间的通信就不需要像容器一样，通过内外端口映射来通信了，这样就避免了端口冲突的问题。</p>
 <p>特殊的情况下（比如运维做网络检测或者程序调试），可以在pod所在的宿主机想向pod的ip+端口发起请求，这些请求会转发到pod的端口，但是pod本身它自己是不知道端口的存在的。</p>

@@ -163,80 +163,10 @@
 <li>目标 1 把 source 放在独立的私有库是安全性考虑</li>
 <li>目标 3 和 4 是方便可以使用两种方法都能达到部署的目标， 3 是手工部署， 4 是通过<code>git push</code>触发，比如 github 的 action 可能某些原因失败了，暂时又没时间去维护，那么我可以直接在本地<code>hexo d -g</code>部署就行</li>
 <li>目标5是实现3和4的时候，两种方法的目标仓库(publish repo)地址配置只需要一处维护，不需要分散在 _config.yml 和 github action</li>
-<li>目标 6 是可选目标。 如果不需要区分工作和私人用的github 账号，可以不需要理会这个目标。</li>
-</ul>
-<h2 id="1-2-已有的解决方案分析"><a href="#1-2-已有的解决方案分析" class="headerlink" title="1.2 已有的解决方案分析"></a>1.2 已有的解决方案分析</h2><p>为了达到上面这些目标，我找了一轮市面上各种各样的解决方案，没看到完全符合要求的。主要问题包括</p>
-<ul>
-<li>github action market上的hexo action没有支持同时部署到github和coding的action可以直接重用</li>
-<li>github action market上已有的hexo action的deploy方式无非两种，一种是直接把目标(publish repo)仓库地址配置action，一种是直接使用source里面_config.yml的配置. 如果是前者，则意味着我们需要吧publish repo写在两个地方，一个是本地的_config.yml一个是action。维护起来比较麻烦。明显应该使用后者。</li>
-<li>其他的一些博客提到的方法里面，大多存在前面一点存在的问题，而且大多是直接在action里定制脚本，没有抽成action，不方便重用。</li>
-</ul>
-<p>就这样，观摩了一轮，我决定fork一个github mark上的hexo action出来，按需求自己弄一个action，经过考察，<code>[sma11black/hexo-action](https://github.com/sma11black/hexo-action)</code>这个action比较接近需求，只需要简单改造就可以使用，怎么改造这里就不说了，<a href="/2020/06/25/hexo-action-deploy-to-coding-and-multi-account/" title="见上一篇文章">见上一篇文章</a></p>
-<p>经过简单改造的action的仓库是 <code>[noosphere-coder/hexo-action@master](https://github.com/noosphere-coder/hexo-action)</code>,下面我们直接使用就好</p>
-<h1 id="2-正文"><a href="#2-正文" class="headerlink" title="2 正文"></a>2 正文</h1><h2 id="2-1-只实现目标1-5的配置"><a href="#2-1-只实现目标1-5的配置" class="headerlink" title="2.1 只实现目标1-5的配置"></a>2.1 只实现目标1-5的配置</h2><p>排除掉目标6，只需要是实现上面说的1-5的目标，也即是我们可以使用我们平时已经在github和coding里面使用的ssh key就好。那么配置很简单</p>
-<ol>
-<li>配置hexo的deploy</li>
-</ol>
-<p>找到hexo根目录的_config.yml,然后配置deploy字段的内容如下</p>
-<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">'git'</span></span><br><span class="line">  <span class="attr">repo:</span> </span><br><span class="line">    <span class="attr">github:</span> <span class="string">'git@noosphere-coder.github.com:noosphere-coder/noosphere-coder.github.io.git'</span></span><br><span class="line">    <span class="attr">coding:</span> <span class="string">'git@e.coding.net:noosphere/noosphere.git'</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">'master'</span></span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>配置github CI Actions</li>
-</ol>
-<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="attr">name:</span> <span class="string">CI</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span> <span class="string">[</span> <span class="string">master</span> <span class="string">]</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span> <span class="string">[</span> <span class="string">master</span> <span class="string">]</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build-and-deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">container:</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">node:13-alpine</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v1</span></span><br><span class="line">      <span class="attr">with:</span></span><br><span class="line">        <span class="attr">submodules:</span> <span class="literal">true</span> </span><br><span class="line">    </span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">Dependencies</span></span><br><span class="line">      <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line">        <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">deploy</span></span><br><span class="line">      <span class="attr">uses:</span> <span class="string">noosphere-coder/hexo-action@master</span></span><br><span class="line">      <span class="attr">with:</span></span><br><span class="line">        <span class="attr">deploy_key:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.DEPLOY_KEY</span> <span class="string">&#125;&#125;</span></span><br><span class="line">        <span class="comment"># user_name: your github username  # (or delete this input setting to use bot account)</span></span><br><span class="line">        <span class="comment"># user_email: your github useremail  # (or delete this input setting to use bot account)</span></span><br><span class="line">        <span class="attr">commit_msg:</span> <span class="string">$&#123;&#123;</span> <span class="string">github.event.head_commit.message</span> <span class="string">&#125;&#125;</span>  </span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Get</span> <span class="string">the</span> <span class="string">output</span></span><br><span class="line">      <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line">        <span class="string">echo</span> <span class="string">"$<span class="template-variable">&#123;&#123; steps.deploy.outputs.notify &#125;&#125;</span>"</span></span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>ssh key 配置<br>3.1 私钥配置: 把<code>/home/$USER/ssh/id_rsa</code>的内容复制出来，在入口： {私有库}-&gt;settings-&gt;Secrets-&gt;New secret，新建名为<code>DEPLOY_KEY</code>的key，加入id_rsa的内容<br>3.2 公钥配置: 把<code>/home/$USER/ssh/id_rsa.pub</code>分别配置在github和coding的目标仓库<ul>
-<li>github的配置入口是 {目标仓库}-&gt;settings-&gt;Deploy keys-&gt;add deploy keys</li>
-<li>coding的配置入口是 {目标仓库}-&gt;设置-&gt;部署公钥-&gt;新建部署公钥</li>
-</ul>
-</li>
-</ol>
-<p>至此，实现1-5目标的配置已经完成，也就是，我们可以分别用下面这两种方式都可以同时部署到github和coding</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo g -d <span class="comment"># 或者 hexo d -g</span></span><br></pre></td></tr></table></figure>
-<p>和</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push origin master</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-2-可选-不需要可以跳过-实现目标6：使用独立的ssh-key来部署（也就是可以新建多个的github账号来部署你的hexo站点）"><a href="#2-2-可选-不需要可以跳过-实现目标6：使用独立的ssh-key来部署（也就是可以新建多个的github账号来部署你的hexo站点）" class="headerlink" title="2.2 [可选,不需要可以跳过] 实现目标6：使用独立的ssh key来部署（也就是可以新建多个的github账号来部署你的hexo站点）"></a>2.2 [可选,不需要可以跳过] 实现目标6：使用独立的ssh key来部署（也就是可以新建多个的github账号来部署你的hexo站点）</h2><p>目标6是采用另外的ssh key，而不是直接使用<code>/home/$USER/ssh/id_rsa</code>,一般来说，这样作无非是这几种目的</p>
-<ol>
-<li>区分私人的id和工作用的key</li>
-<li>不要直接使用id_rsa,减少安全隐患</li>
-<li>同时维护多个隔离的hexo站点</li>
-</ol>
-<p>为了达到这个目的，我们需要告诉ssh，在碰到这个hexo的仓库的时候，请使用独立的 key。下面我们来实现这个目标</p>
-<ol>
-<li>生成独立的key用于部署（这里的key命名是nooshpere-coder）</li>
-</ol>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen noosphere-coder</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>告诉ssh进行路由, 在终端执行下面命令，生成一份config配置到<code>/home/$USER/.ssh</code>目录</li>
-</ol>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt; EOF &gt; /home/<span class="variable">$USER</span>/.ssh/config</span><br><span class="line">Host github.com  </span><br><span class="line">    HostName github.com  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">Host noosphere-coder.github.com  </span><br><span class="line">    HostName github.com  </span><br><span class="line">    PreferredAuthentications publickey </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/noosphere-coder</span><br><span class="line"></span><br><span class="line">Host e.coding.net  </span><br><span class="line">    HostName e.coding.net  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/id_rsa </span><br><span class="line"></span><br><span class="line">Host noosphere-coder.coding.net  </span><br><span class="line">    HostName e.coding.net  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/noosphere-coder</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li><p>ssh key 配置，和上面的<code>ssh key 配置</code>配置步骤一样，只需要把id_rsa改成noosphere-coder的内容就行了。</p>
-</li>
-<li><p>把私有仓库的remote改掉</p>
-</li>
-</ol>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git remote <span class="built_in">set</span>-url origin git@noosphere-coder.github.com:noosphere-coder/hexo-action.git</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>以上 noosphere-coder请替换成你自己的仓库名称</p>
-</blockquote>
-<p>至此，目标6已经完成，这个时候，你再去执行<code>git push</code>的时候，ssh会自动使用独立的key而不会使用默认的id_rsa.</p>
-<h2 id="3-DNS双线配置"><a href="#3-DNS双线配置" class="headerlink" title="3. DNS双线配置"></a>3. DNS双线配置</h2><p>同时部署到github和coding主要是为了国内访问和国外访问流量区分，一个为了速度，二者为了搜索引擎收录（github封了百度的爬虫）</p>
-<p>这个配置，实在没什么好讲的，直接上图吧</p>
-<ol>
-<li>DSN服务商的控制面板配置</li>
-</ol>
-<p><img src="https://s1.ax1x.com/2020/07/14/UNGWhF.png" alt="DSN服务商的控制面板配置"></p>
-<ol start="2">
-<li>github的域名配置<br><img src="https://s1.ax1x.com/2020/07/14/UNKuxP.png" alt="github的域名配置"></li>
-<li>coding的的域名配置<br><img src="https://s1.ax1x.com/2020/07/14/UNdYvD.png" alt="coding的的域名配置"></li>
-</ol>
-
+<li>目标 6 是可选目标。 如果不需要区分工作和私人用的github 账号，可以不需要理会这个目标。
+          <div class="read-more">
+            <a href="/2020/07/14/hexo-action-deploy-to-coding-and-github-gracefully/" class="read-more-link">阅读更多</a>
+          </div>
         </div></article>
       <article class="post">
     <header class="post-header">
@@ -260,16 +190,9 @@
 
     <div class="post-content"><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>在ubuntu desktop里面用virutalbox来安装deepin，然后如果希望宿主机和虚拟机之间可以进行内容的copy/paste，需要安装扩展。</p>
 <p>一般来说，如果在windows下，直接在virtualbox里面执行安装功能，virtualbox会直接下载然后完成安装，但是ubuntu下安装deepin如果直接执行操作，virtualbox也会去下载扩展的安装包，但是下载完后，安装的时候，会报找不到扩展的安装包。而且之后重启你会发现不能正常进入deepin系统。</p>
-<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><ol>
-<li>在deepin的启动界面，选择进入修复模式</li>
-<li>进入后系统后，打开终端，执行下面命令</li>
-</ol>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install console-setup plymouth-themes</span><br><span class="line">sudo sh /media/&#123;host user&#125;/VBox_GAs_5.2.34/VBoxLinuxAdditions.run</span><br></pre></td></tr></table></figure>
-
-<p>说明： console-setup和plymouth-themes安装扩展的时候需要的依赖，需要先安装</p>
-<p>如能正常完成安转，安转完后，重启虚拟机，就可以进入系统了。</p>
-<h2 id="One-more-thing"><a href="#One-more-thing" class="headerlink" title="One more thing"></a>One more thing</h2><p>另外，需要提醒一点的是，如果用virtualbox来做跑虚拟机，最好定期或者在做重大操作的时候做好<code>系统快照</code>备份</p>
-
+          <div class="read-more">
+            <a href="/2020/07/01/deepin-vbox-linux-additions-install/" class="read-more-link">阅读更多</a>
+          </div>
         </div></article>
       <article class="post">
     <header class="post-header">
@@ -297,59 +220,9 @@
 <li>同一份hexo source库，只需要配置一次hexo的<code>_config.yml</code>，就可以直接通过<code>hexo deploy -g</code> 或者<code>git push</code>来触发部署</li>
 <li>支持多个github账号，同时也支持多个coding账号</li>
 </ol>
-<h1 id="配置hexo的deploy"><a href="#配置hexo的deploy" class="headerlink" title="配置hexo的deploy"></a>配置hexo的deploy</h1><p>找到hexo根目录的_config.yml,然后配置deploy字段的内容如下</p>
-<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">'git'</span></span><br><span class="line">  <span class="attr">repo:</span> </span><br><span class="line">    <span class="attr">github:</span> <span class="string">'git@noosphere-coder.github.com:noosphere-coder/noosphere-coder.github.io.git'</span></span><br><span class="line">    <span class="attr">coding:</span> <span class="string">'git@e.coding.net:noosphere/noosphere.git'</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">'master'</span></span><br></pre></td></tr></table></figure>
-<p>这个配置目标是让我们直接<code>hexo deploy</code>可以同时推送到 github 和 coding 的 pages 仓库</p>
-<h2 id="配置-hexo-deploy命令支持多个github和coding账号"><a href="#配置-hexo-deploy命令支持多个github和coding账号" class="headerlink" title="配置 hexo deploy命令支持多个github和coding账号"></a>配置 hexo deploy命令支持多个github和coding账号</h2><p>一般来说，如果我只有一个github的账号，在这个配置下直接执行<code>hexo g -d</code>，一个命令就可以直接完成两个仓库的部署了。 </p>
-<p>那么如果我们的github账号有多个，比如有一个办公用的，一个私人的，那怎么办？<br>我们知道 git 的 ssh 推送方式是需要使用特定的 key 的， 所以，我们只需要配置 ssh 去路由特定的域名到key即可.</p>
-<p>根据需求，在配置这个ssh key的路由之前，我们要先生成一个key用于做pages部署</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen noosphere-coder</span><br></pre></td></tr></table></figure>
-<p>然后一路回车就行(不需要太强的安全性的话)，生成后key在<code>/home/$USER/.ssh/</code>目录下</p>
-<p>为了这个key可以推送到github或者coding的独立账号，我们需要把这个key加入到github和coding的账号，比如我新建了一个noosphere-coder的github账号，那么我把这个noosphere-coder的ssh key作为这个账户的ssh key即可，打开<code>[https://github.com/settings/keys](https://github.com/settings/keys)</code>，点击 <code>New SSH key</code>增加即可，加入后，我们就可以用这个key来操作这个github账号了（coding也类似）。</p>
-<p>接下来，我们用这个key来配置ssh key的路由，达到执行<code>git push</code>命令的时候自动使用不同的key：</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt; EOF &gt; /home/<span class="variable">$USER</span>/.ssh/config</span><br><span class="line">Host github.com  </span><br><span class="line">    HostName github.com  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">Host noosphere-coder.github.com  </span><br><span class="line">    HostName github.com  </span><br><span class="line">    PreferredAuthentications publickey </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/noosphere-coder</span><br><span class="line"></span><br><span class="line">Host e.coding.net  </span><br><span class="line">    HostName e.coding.net  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/id_rsa </span><br><span class="line"></span><br><span class="line">Host noosphere-coder.coding.net  </span><br><span class="line">    HostName e.coding.net  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /home/<span class="variable">$USER</span>/.ssh/noosphere-coder</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
-
-<p>这个配置告诉ssh，如果碰到Host为<code>noosphere-coder.github.com</code>或者<code>noosphere-coder.coding.net</code>的时候就去使用<code>/home/$USER/.ssh/noosphere-coder</code>这个key</p>
-<p>但是，由于我们新建的github的仓库，默认的remote url的是<code>git@github.com:noosphere-coder/hexo-noosphere.git</code>（coding亦如是）<br>所以我们需要修改这个仓库的remote url为<code>git@noosphere-coder.github.com:noosphere-coder/hexo-action.git</code></p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git remote <span class="built_in">set</span>-url origin git@noosphere-coder.github.com:noosphere-coder/hexo-action.git</span><br></pre></td></tr></table></figure>
-
-<p>coding项目也如法炮制即可。</p>
-<p>截止目前，你用<code>hexo g -d</code>就可以用不同的账号推送到github和coding了。</p>
-<h1 id="配置github-CI-Actions"><a href="#配置github-CI-Actions" class="headerlink" title="配置github CI Actions"></a>配置github CI Actions</h1><p>上面章节，我们配置了git和hexo，完成了通过一个 <code>hexo g -d</code>的命令直接推送到github和coding，并支持多个账号。 </p>
-<p><code>hexo g</code>是在本地生成静态文件，我们的source文件的仓库一般是放在github，然后配置为私有仓库，保证安全性，所以，我们接下来配置github CI actions，来达到直接直接用<code>git push</code>来触发<code>hexo g -d</code>，也就是，当我们<code>git push</code>的时候，CI自动生成静态文件，然后自动推送到github和coding的静态pages仓库。</p>
-<p>下面我们来看看最终的CI action的配置，然后再来解释</p>
-<h2 id="github-hexo-ci-action"><a href="#github-hexo-ci-action" class="headerlink" title="github hexo ci action"></a>github hexo ci action</h2><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># This is a basic workflow to help you get started with Actions</span></span><br><span class="line"></span><br><span class="line"><span class="attr">name:</span> <span class="string">CI</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Controls when the action will run. Triggers the workflow on push or pull request</span></span><br><span class="line"><span class="comment"># events but only for the master branch</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span> <span class="string">[</span> <span class="string">master</span> <span class="string">]</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span> <span class="string">[</span> <span class="string">master</span> <span class="string">]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># A workflow run is made up of one or more jobs that can run sequentially or in parallel</span></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="comment"># This workflow contains a single job called "build"</span></span><br><span class="line">  <span class="attr">build-and-deploy:</span></span><br><span class="line">    <span class="comment"># The type of runner that the job will run on</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">container:</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">node:13-alpine</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">    <span class="comment"># Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v1</span></span><br><span class="line">      <span class="attr">with:</span></span><br><span class="line">        <span class="attr">submodules:</span> <span class="literal">true</span> <span class="comment"># Checkout private submodules(themes or something else).</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Caching dependencies to speed up workflows. (GitHub will remove any cache entries that have not been accessed in over 7 days.)</span></span><br><span class="line">    <span class="comment"># - name: Cache node modules</span></span><br><span class="line">    <span class="comment">#   uses: actions/cache@v1</span></span><br><span class="line">    <span class="comment">#   id: cache</span></span><br><span class="line">    <span class="comment">#   with:</span></span><br><span class="line">    <span class="comment">#     path: node_modules</span></span><br><span class="line">    <span class="comment">#     key: $&#123;&#123; runner.os &#125;&#125;-node-$&#123;&#123; hashFiles('**/package-lock.json') &#125;&#125;</span></span><br><span class="line">    <span class="comment">#     restore-keys: |</span></span><br><span class="line">    <span class="comment">#       $&#123;&#123; runner.os &#125;&#125;-node-</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">Dependencies</span></span><br><span class="line">      <span class="comment"># if: steps.cache.outputs.cache-hit != 'true'</span></span><br><span class="line">      <span class="comment"># run: npm ci</span></span><br><span class="line">      <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line">        <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Deploy hexo blog website.</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Deploy</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">deploy</span></span><br><span class="line">      <span class="comment"># uses: noosphere-coder/hexo-action@master</span></span><br><span class="line">      <span class="attr">uses:</span> <span class="string">noosphere-coder/hexo-action@master</span></span><br><span class="line">      <span class="attr">with:</span></span><br><span class="line">        <span class="attr">deploy_key:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.DEPLOY_KEY</span> <span class="string">&#125;&#125;</span></span><br><span class="line">        <span class="comment"># user_name: your github username  # (or delete this input setting to use bot account)</span></span><br><span class="line">        <span class="comment"># user_email: your github useremail  # (or delete this input setting to use bot account)</span></span><br><span class="line">        <span class="attr">commit_msg:</span> <span class="string">$&#123;&#123;</span> <span class="string">github.event.head_commit.message</span> <span class="string">&#125;&#125;</span>  <span class="comment"># (or delete this input setting to use hexo default settings)</span></span><br><span class="line">    <span class="comment"># Use the output from the `deploy` step(use for test action)</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Get</span> <span class="string">the</span> <span class="string">output</span></span><br><span class="line">      <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line">        <span class="string">echo</span> <span class="string">"$<span class="template-variable">&#123;&#123; steps.deploy.outputs.notify &#125;&#125;</span>"</span></span><br></pre></td></tr></table></figure>
-
-<p>配置说明：</p>
-<ol>
-<li>在这个配置里面，我们use了一个action,<code>[noosphere-coder/hexo-action@master](https://github.com/noosphere-coder/hexo-action)</code>，这个是我根据目标定制的一个action，来自于<code>[sma11black/hexo-action](https://github.com/sma11black/hexo-action)</code></li>
-<li>这里没有使用dependency cache，因为 <code>node-sass</code>这本地构建的包在cache的情况下存在版本不一致的问题，暂时没找到解决办法</li>
-</ol>
-<p>那么，这里我们为什么要定制一个自己的action，原因是<code>smallblack/hexo-action</code>不支持同时推送到github和coding</p>
-<p>因此，我们fork这个action的仓库来改造一下</p>
-<h2 id="改造-smallblack-hexo-action的entrypoint-sh"><a href="#改造-smallblack-hexo-action的entrypoint-sh" class="headerlink" title="改造 smallblack/hexo-action的entrypoint.sh"></a>改造 <code>smallblack/hexo-action</code>的<code>entrypoint.sh</code></h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -e</span><br><span class="line"></span><br><span class="line"><span class="comment"># setup ssh-private-key</span></span><br><span class="line">mkdir -p /root/.ssh/</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"<span class="variable">$INPUT_DEPLOY_KEY</span>"</span> &gt; /root/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">chmod 600 /root/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">ssh-keyscan -t rsa github.com &gt;&gt; /root/.ssh/known_hosts</span><br><span class="line">ssh-keyscan -t rsa e.coding.net &gt;&gt; /root/.ssh/known_hosts</span><br><span class="line"></span><br><span class="line"><span class="comment"># you can change here to router domain with defferent key with you need</span></span><br><span class="line">cat &lt;&lt; EOF &gt; /root/.ssh/config</span><br><span class="line">Host github.com  </span><br><span class="line">    HostName github.com  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /root/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">Host <span class="variable">$GITHUB_ACTOR</span>.github.com  </span><br><span class="line">    HostName github.com  </span><br><span class="line">    PreferredAuthentications publickey</span><br><span class="line">    IdentityFile /root/.ssh/id_rsa</span><br><span class="line"></span><br><span class="line">Host e.coding.net  </span><br><span class="line">    HostName e.coding.net  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /root/.ssh/id_rsa </span><br><span class="line"></span><br><span class="line">Host <span class="variable">$GITHUB_ACTOR</span>.coding.net  </span><br><span class="line">    HostName e.coding.net  </span><br><span class="line">    PreferredAuthentications publickey  </span><br><span class="line">    IdentityFile /root/.ssh/id_rsa </span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">chmod 600 /root/.ssh/config</span><br><span class="line"></span><br><span class="line"><span class="comment"># setup deploy git account</span></span><br><span class="line">git config --global user.name <span class="string">"<span class="variable">$INPUT_USER_NAME</span>"</span></span><br><span class="line">git config --global user.email <span class="string">"<span class="variable">$INPUT_USER_EMAIL</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># install hexo env</span></span><br><span class="line">npm install hexo-cli -g</span><br><span class="line">npm install hexo-deployer-git --save</span><br><span class="line"></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/<span class="variable">$GITHUB_ACTOR</span>/<span class="variable">$GITHUB_ACTOR</span>.github.io.git .deploy_git</span><br><span class="line"><span class="built_in">echo</span> <span class="string">'have clone .deploy_git'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># npm remove node-sass hexo-renderer-scss</span></span><br><span class="line"><span class="comment"># npm install hexo-renderer-scss</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># deployment</span></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$INPUT_COMMIT_MSG</span>"</span> == <span class="string">""</span> ]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    hexo g -d</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    hexo g -d -m <span class="string">"<span class="variable">$INPUT_COMMIT_MSG</span>"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> ::<span class="built_in">set</span>-output name=notify::<span class="string">"Deploy complate."</span></span><br></pre></td></tr></table></figure>
-
-<p>这个改造也很简单</p>
-<ol>
-<li>把我们上面生成的<code>noosphere-coder</code>的这个ssh key 配置成 变量，然后把它生成为跑action的容器的ssh key <code>/root/.ssh/key</code></li>
-<li>把coding的证书加入的known_hosts</li>
-<li>配置ssh key 路由</li>
-</ol>
-<p>看到第一点，我们就知道，我们需要把noosphere-coder的ssh key的秘钥加入到source仓库的secret key，并且命名为 <code>DEPLOY_KEY</code>:</p>
-<ol>
-<li>打开你github的source 仓库</li>
-<li>点击<code>settings</code></li>
-<li>点击<code>Secrets</code></li>
-<li>点击<code>New secret</code></li>
-</ol>
-<p>然后把本地的<code>/home/$USER/.ssh/noosphere-coder</code>的内容复制进去即可。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ol>
-<li><p>通过以上<code>折腾</code>，我们完成了一个比较优雅的hexo部署方式，既可以直接用在本地一条命令<code>hexo g -d</code>直接部署到github和coding，也可以通过<code>git push</code>来触发这个同时部署，而且github和coding的静态pages的仓库配置只需要在hexo的_config.yml配置一次就可以了。</p>
-</li>
-<li><p>同时，我们这个方法支持在机器上使用多个github或者coding账号，可以区分同时拥有如办公和私人账号的这类情况</p>
-</li>
-</ol>
-
+          <div class="read-more">
+            <a href="/2020/06/25/hexo-action-deploy-to-coding-and-multi-account/" class="read-more-link">阅读更多</a>
+          </div>
         </div></article>
       <article class="post">
     <header class="post-header">
@@ -375,8 +248,6 @@
     </header>
 
     <div class="post-content"><p>刚刚收到阿里云发的短信，说618活动升级，点进去一看是<a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">拼团活动</a>，拼团的价格比之前还要低，之前2核4G是320/年，现在开始是301/年，3年从960跌到了904. <a href="https://blog.csdn.net/youlin/article/details/106797052" target="_blank" rel="noopener">之前我已经对比过</a>，阿里在这次活动里优惠力度比另外两家还有大，现在竟然还继续降价。虽然还是“但见新人笑那闻旧人哭”系列，但是阿里对于拉新可以说非常上心。<br><img src="https://img-blog.csdnimg.cn/20200618171302320.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt=""><br>于是，赶紧弄了个拼团链接分享给大家</p>
-<p><a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">618 拼团分享页</a><br>​<br>看来我之前的判断没错，根据前段时间阿里云的市场报告，阿里云的收入在下降，阿里云目前的市场被腾讯云和华为云用低价格抢了不少，已经感受到了压力，现在加大力度圈地。</p>
-<p>可以预见，随着腾讯云和华为云的崛起，主打性价比的策略奏效后，阿里以后加大力度和对手抢新客户，对于针对新客户的优惠应该会持续下去，而且应该非常有竞争力。</p>
           <div class="read-more">
             <a href="/2020/06/19/618-ecs/" class="read-more-link">阅读更多</a>
           </div>
@@ -414,13 +285,9 @@
 <p>腾讯云，每天提供5场的秒杀活动,价格一如既往的优惠,而且性能都是100%,而阿里的低端ecs则是突发性能的多, 这点看,腾讯云比较给力.</p>
 <p>华为云，有自己研发硬件的能力,性能非常不错(当然可能也和它的云的使用饱和度有关系),也都是性能100%,而且对于新人,有很多套餐价格比腾讯云还要划算.</p>
 <p>总的来看两家的活动符合他们一贯的风格, 阿里云优惠种类多,比较灵活,腾讯云和华为云主打性价比,总体而言.大家各有优势. </p>
-<h2 id="阿里云活动细节"><a href="#阿里云活动细节" class="headerlink" title="阿里云活动细节"></a>阿里云活动细节</h2><h3 id="个人新用户"><a href="#个人新用户" class="headerlink" title="个人新用户"></a>个人新用户</h3><p><img src="https://img-blog.csdnimg.cn/20200601182346824.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="阿里云 个人新用户"></p>
-<h3 id="企业新用户"><a href="#企业新用户" class="headerlink" title="企业新用户"></a>企业新用户</h3><p><img src="https://img-blog.csdnimg.cn/20200601182346813.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="阿里云 企业新用户"></p>
-<h3 id="免费体验"><a href="#免费体验" class="headerlink" title="免费体验"></a>免费体验</h3><p><img src="https://img-blog.csdnimg.cn/20200601182346799.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="阿里云 免费试用"><br><img src="https://img-blog.csdnimg.cn/20200601182346827.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="阿里云 免费试用"></p>
-<h2 id="腾讯云活动细节"><a href="#腾讯云活动细节" class="headerlink" title="腾讯云活动细节"></a>腾讯云活动细节</h2><h3 id="企业专区"><a href="#企业专区" class="headerlink" title="企业专区"></a>企业专区</h3><p><img src="https://img-blog.csdnimg.cn/20200601182346874.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="腾讯云 企业专区"></p>
-<h3 id="每天5场秒杀"><a href="#每天5场秒杀" class="headerlink" title="每天5场秒杀"></a>每天5场秒杀</h3><p><img src="https://img-blog.csdnimg.cn/20200601182346875.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="腾讯云 618 每日5场秒杀"></p>
-<h2 id="华为云活动细节"><a href="#华为云活动细节" class="headerlink" title="华为云活动细节"></a>华为云活动细节</h2><p><img src="https://img-blog.csdnimg.cn/20200605174439234.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-
+          <div class="read-more">
+            <a href="/2020/06/17/aliyun-tencentcloud-huaweicloud-618-activities-compare/" class="read-more-link">阅读更多</a>
+          </div>
         </div></article>
       <article class="post">
     <header class="post-header">
@@ -455,35 +322,9 @@
 <li>网络</li>
 </ul>
 <p>这4样东西,可以说是一个服务器它生命里面最重要的东西了,那么我们简要(否则又变成长文了,大家都不喜欢看长文…)的来说一说这4个家伙.</p>
-<ul>
-<li><p><strong>CPU</strong>, 除了华为有实实在在的芯片级别的研发能力外,其他的服务商不同服务提供商的 CPU其实没有太多区别,不过就算是华为,鲲鹏处理器虽说性能有提升,但是鲲鹏目前也不是华为云的主打 CPU <strong>(华为是 x86 + 鲲鹏的双引擎 stack )</strong>,所以,目前来说, CPU 本身的硬件的区别暂时不需要考虑太多,在CPU这个维度,更多的可能需要考虑<strong>CPU的隔离做的好不好</strong>. 这方面<a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">阿里云</a>做的很不错,所以它敢推出那种突发性性能的T系列. 但是突发性能适不适合你的需求,这又是一个需要考虑的问题,下面我们再来细讲.</p>
-</li>
-<li><p><strong>内存</strong>, 这个东西没什么好说的,主要是要根据场景来选择适合内存的大小就好…</p>
-</li>
-<li><p><strong>硬盘</strong>, 一般来讲有硬盘有普通 io 和高 io 以及超高 io ,还有一点要考虑,是否真正的云硬盘,不要硬盘损坏了,数据完全找不回来(某云不要对号入座…),<strong>这方面<a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">阿里云</a>的 essd 做的非常好,<a href="https://activity.huaweicloud.com/discount_area_v5/index.html?bpName=0624afd8cc8010e00fa6c012ee3ca040&bindType=1&salesID=linlin888" target="_blank" rel="noopener">华为云</a>也有对标产品</strong>,根据我们的测试,性能也是非常强劲.</p>
-</li>
-<li><p><strong>网络</strong>, 网络又要分两个方面,一个外部网络 BGP 这种互联互通的覆盖的情况,另外一个是 IDC 内网本身的网络优化程度,以及跨机房之间的网络优化. 网络这方面,对于一般的中小客户来讲,一般不会有什么大的区别,一般当你到底一定的网络使用程度才开始考虑这个问题.不过单就这个维度来说,阿里云也是绝对的佼佼者,华为云也做的非常不错.<br>那么对于这4个维度,网络这个维度,其实原则上它不能归到某一台服务器,除了网卡本身外,网络宽带的大小,稳定性等,和主机的硬件其实没有什么特别的关系,更多是这个云提供商本身对网络的优化能力,所以我们先抛开它.</p>
-</li>
-</ul>
-<p>那么对于, CPU、内存和硬盘这 3 个维度,如果我们把对这3种资源的需求度,画成一个排列组合穷举的表格,那所有场景基本都在里面了<br><img src="https://img-blog.csdnimg.cn/20200608113926693.png#pic_center" alt="在这里插入图片描述"></p>
-<p>这个穷举，我们就不在这里完整列出来了（免得文章拉的太长），但是我们的所有的需求都是可以符合则个排列组合里面的而一种的。 当我们有需求的时候，如果有能算出具体的指标的时候，那么可直接用指标来，比如我的内存最高峰需要多少，我的硬盘最高峰需要的写入IO是多少，那么可以直接去找对标的产品，但是有很多时候我们并不需要做这么细致准确的评估，这时候可以根据经验直接去判断也是可以的，也就是说一开始的时候不至于性能表现的太差，也不至于太浪费，这种原则是允许的。</p>
-<p>如果上面这种评估还是太细的话，那么可以感觉经验，直接把你的需求对每一项资源特别需求大的来作为主要考虑因素。</p>
-<p>比如：</p>
-<ul>
-<li><strong>低资源需求型</strong>，就是你的业务，基本上长期都不需要什么特别好资源的，比如放一些宣传用的静态网页，而且也没几个人访问</li>
-<li><strong>计算突发型</strong>,在某个时刻对CPU和内存特别饥渴的。典型的比如公司内部的工作流系统，只有上班的时候才会发一些工单和审批工单。在这个时间段多人同时上来，然后用完很快又闲置下去。</li>
-<li><strong>计算型</strong>，就是一直都有高CPU和内存的需求的，比如某个分布式的流计算节点。数据源源不断的进来，然后计算完后通过网络交给存储系统或者交给其他子系统。</li>
-<li><strong>高IO型</strong>，又分为高读和高写的需求不同，如果读写都需要很高，那么就需要用到超高IO类型的云盘，如果只是读高，写一般，那么就未必，普通的高IO的云盘可能就能满足需求了。比如，比如一些机器学习的任务，需要评分的读写数据和存储参数，就会同时的高读和高写，那就需要考虑这个硬盘的问题。</li>
-<li><strong>高稳定性，高安全性型</strong>，数据不能容丢失，丢失的话损失非常大，而且要求安全防护做的非常优秀。一般来说，这种需求的都是公司类型的核心业务系统，关乎一家企业的命脉的这种业务。<br>以上这几个就是通常可以作为主要考虑因素的指标。</li>
-</ul>
-<p>那么在选择上，对于<strong>低资源需求</strong>的，目前市面上随便找一家大的厂家，差别都不太大，你唯一需要考虑的是价格，谁价格低，就选谁就没错了。这方面<a href="https://cloud.tencent.com/act/cps/redirect?redirect=1040&cps_key=2ca2817c917f7cd22e132a1de16ecf64&from=console" target="_blank" rel="noopener">腾讯云</a>长期有大量的优惠券，有一定的优势。</p>
-<p>对于<strong>计算突发型</strong>的，可以考虑<a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">阿里云</a>的计算突发型，按cpu使用的量来换去积分，如果你的需求满足这种条件，这种类型的服务器，也有可取之处。</p>
-<p>对于<strong>计算型</strong>，可能要具体去对比些服务商的性价比了，但是就CPU一项来讲，<a href="https://activity.huaweicloud.com/discount_area_v5/index.html?bpName=0624afd8cc8010e00fa6c012ee3ca040&bindType=1&salesID=linlin888" target="_blank" rel="noopener">华为云</a>后续的发展非常值得期待。</p>
-<p>对于<strong>高IO型</strong>，主要要看云硬盘的性能，如果是这方面需求特别强烈的话，建议考虑<a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">阿里云</a>和<a href="https://activity.huaweicloud.com/discount_area_v5/index.html?bpName=0624afd8cc8010e00fa6c012ee3ca040&bindType=1&salesID=linlin888" target="_blank" rel="noopener">华为云</a></p>
-<p>对于<strong>高稳定性和高安全性类型</strong>，首推<a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">阿里云</a>，次推<a href="https://activity.huaweicloud.com/discount_area_v5/index.html?bpName=0624afd8cc8010e00fa6c012ee3ca040&bindType=1&salesID=linlin888" target="_blank" rel="noopener">华为云</a>，然后是<a href="https://cloud.tencent.com/act/cps/redirect?redirect=1062&cps_key=2ca2817c917f7cd22e132a1de16ecf64&from=console" target="_blank" rel="noopener">腾讯云</a></p>
-<p>上面我带了链接了，具体的情况，可以自己去对比，就不在这里做详细的跨服务商对比了。</p>
-<p>先写这么多，等有时间，另外在开一篇文章来根据<strong>具体场景</strong>分析具体需求。</p>
-
+          <div class="read-more">
+            <a href="/2020/06/08/choose-ecs-server-with-requirements/" class="read-more-link">阅读更多</a>
+          </div>
         </div></article>
       <article class="post">
     <header class="post-header">
@@ -521,32 +362,9 @@
 </ul>
 <p>熟悉软件工程的人一看就知道,这个东西其实也符合软件工程的规律,性能和安全性(稳定性)往往难以兼得.</p>
 <p>另外,根据我们测试,<strong><a href="https://activity.huaweicloud.com/discount_area_v5/index.html?bpName=0624afd8cc8010e00fa6c012ee3ca040&bindType=1&salesID=linlin888" target="_blank" rel="noopener">华为云</a>作为后起之秀,性能比腾讯云还要好,这点出乎我们的意料之外</strong>(我想可能更华为有硬件研发能力有关系),这点可供大家参考.</p>
-<p>所以如何选择还是要视乎你的需求,价格和性能敏感的,可以考虑腾讯云或者华为云,业务非常重要的,当机成本非常高的话,可能要重点考虑稳定性和安全性.</p>
-<p>至于价格方面,可以一下几个方面对比</p>
-<ul>
-<li>特殊优惠对比 (比如双十一,开年采购季,618这类活动)</li>
-<li>新人优惠对比</li>
-<li>日常优惠对比 (比如日常的秒杀)</li>
-</ul>
-<p>下面,我们简单对比一下上面说的3种优惠情况下的价格(注意:以下对比价格会随着时间变化,具体还要大家点进去自己查阅最新的情况)</p>
-<h2 id="特殊优惠对比"><a href="#特殊优惠对比" class="headerlink" title="特殊优惠对比"></a>特殊优惠对比</h2><p>开年的时候,阿里云和腾讯云有搞活动,但是都结束了.不过现在都在搞618优惠活动</p>
-<p><a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">阿里云618活动</a><br><img src="https://img-blog.csdnimg.cn/20200601174953282.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><a href="https://cloud.tencent.com/act/cps/redirect?redirect=1062&cps_key=2ca2817c917f7cd22e132a1de16ecf64&from=console" target="_blank" rel="noopener">腾讯云618优惠活动</a><br>​<br><img src="https://img-blog.csdnimg.cn/20200527113043249.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="新人优惠对比"><a href="#新人优惠对比" class="headerlink" title="新人优惠对比"></a>新人优惠对比</h2><p>腾讯云和阿里云新注册用户都有优惠券</p>
-<p><a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">阿里云优惠券</a></p>
-<p><img src="https://img-blog.csdnimg.cn/20200527113247232.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><a href="https://cloud.tencent.com/act/cps/redirect?redirect=1040&cps_key=2ca2817c917f7cd22e132a1de16ecf64&from=console" target="_blank" rel="noopener">腾讯云优惠券</a><br><img src="https://img-blog.csdnimg.cn/2020052711331334.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>可以看到,就优惠券腾讯云总体比阿里云要灵活划算一点</p>
-<p>不过阿里云一直都有<a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">新人一折起的优惠</a>:</p>
-<p><img src="https://img-blog.csdnimg.cn/20200527113331174.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="日常秒杀对比"><a href="#日常秒杀对比" class="headerlink" title="日常秒杀对比"></a>日常秒杀对比</h2><p><a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">阿里云今日秒杀</a></p>
-<p><img src="https://img-blog.csdnimg.cn/20200527113354450.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><a href="https://cloud.tencent.com/act/cps/redirect?redirect=1062&cps_key=2ca2817c917f7cd22e132a1de16ecf64&from=console" target="_blank" rel="noopener">腾讯云每日4场秒杀</a><br><img src="https://img-blog.csdnimg.cn/20200527113414556.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>可以看到价格方面腾讯云是有优势的.</p>
-<p>我想腾讯云是作为后起者有它的策略,就是市场占有率是当前主要的目标,在安全性和稳定性这两方面还没有得到市场的认可之前,主打价格这个点来达到市场市场占有率是他目前的重要策略. 然而他的性能也并不差,加之腾讯有公众号和小程序的开放开发平台,这两者和它的云服务有机整合.导致最近这些年的市场占有率快速上升.</p>
-<p>但是腾讯云,之前发生过丢失用户数据的事故,给一个用户带来无可往回的损失(数据完全找不回来),这本不应该在云基础服务发生的能在腾讯云发生,所以,如果你从安全性上来考虑的话,阿里云应该作为优先选择(虽然阿里云也有当机的情况,但是数据完全找不回来的事故很少见)</p>
-<p>最后多说一点,除了上面这两个王者之外,我建议还可以考虑一下华为云,<a href="https://activity.huaweicloud.com/discount_area_v5/index.html?bpName=0624afd8cc8010e00fa6c012ee3ca040&bindType=1&salesID=linlin888" target="_blank" rel="noopener">华为云</a>作为后起之秀,在我们的测试里,他们性能非常强劲,题主也可以拓宽一下思路,作为后备选择</p>
-<p><img src="https://img-blog.csdnimg.cn/20200527113442940.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>华为云也有<a href="https://activity.huaweicloud.com/discount_area_v5/index.html?bpName=0624afd8cc8010e00fa6c012ee3ca040&bindType=1&salesID=linlin888" target="_blank" rel="noopener">2.9打折的常规折扣</a></p>
-<p><img src="https://img-blog.csdnimg.cn/20200527113504240.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-
+          <div class="read-more">
+            <a href="/2020/05/27/aliyun-tencentcloud-huaweicloud-compare/" class="read-more-link">阅读更多</a>
+          </div>
         </div></article>
       <article class="post">
     <header class="post-header">
@@ -576,29 +394,9 @@
 <h2 id="主要考虑因素"><a href="#主要考虑因素" class="headerlink" title="主要考虑因素"></a>主要考虑因素</h2><p>云服务器商的各种套餐让人眼花缭乱，原因是因为各自的资源性能不一样。</p>
 <p>虽然有一些标准可以对比，根据个人的使用经验，但是实际性和云服务商的平台架构和技术实力还是差别蛮大，比如不同平台，物理隔离的技术的差异，可能你的服务器会因为隔壁大户老吴抢资源太厉害，而遭遇性能问题。 </p>
 <p>从不了解到知道再到熟悉，有一个过程。所以对于新手来讲，先入门体验一下是最重要的，而搞清楚服务商之间的种种差别反而不太重要，所以，初次体验，我建议成本怎么低怎么来。</p>
-<p>现在基本上各个服务商都有针对新人的优惠，如下面是<a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">阿里云</a>，<a href="https://cloud.tencent.com/act/cps/redirect?redirect=1062&cps_key=2ca2817c917f7cd22e132a1de16ecf64&from=console" target="_blank" rel="noopener">腾讯云</a>，<a href="https://activity.huaweicloud.com/discount_area_v5/index.html?bpName=0624afd8cc8010e00fa6c012ee3ca040&bindType=1&salesID=linlin888" target="_blank" rel="noopener">华为云</a>这三个大服务商现在疫情期间搞的对新人的活动价格对比表：</p>
-<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTZkZmQ3ODAyYTMxOTE3ZWMucG5n?x-oss-process=image/format,png" alt="阿里云，腾讯云，华为云新人优惠活动价格对比"><br><code>注: 上面这个是之前我买服务器时候的价格对比,现在价格已经发生变化了,这个表格主要表达的是对于新手来讲,价格差别不是特别大,至于新的价格,可以上面的连接进去看看最新的就好了</code></p>
-<p>可以看到，从价格上来讲，大家的价格差别不是很大，其实选哪个都差不了太多，其中阿里云对于新手入门级的价格可以说是非常优惠，腾讯云99元是因为它的硬盘存储是50G,我上面没有列出来。</p>
-<h2 id="充分利用好新人身份"><a href="#充分利用好新人身份" class="headerlink" title="充分利用好新人身份"></a>充分利用好新人身份</h2><p>云服务商都想套死用户,所以他们提供给新人的优惠特别大,比如上面这种优惠,老用户是不可能获得的,老用户如果过期了,想再去买,那要<code>贵好几倍</code>.., 所以,我建议第一次购买,如果手头宽松,可以尽量买好一点的,而且时间买尽可能长的.</p>
-<p>那么如果你已经买了,新身份过期(就是老用户了),怎么办呢? 我建议</p>
-<ol>
-<li>换一个服务器提供商，用新人身份去买,还是同样的策略,尽量买更长的时间,手头宽松就买尽量好的配置</li>
-<li>等优惠券或者搞活动的时候一次性买几年的套餐</li>
-</ol>
-<p>其中,换服务商的唯一问题是域名指向迁移,其实也不复杂,因为域名原来都已经备案通过了,迁移是没有问题的.</p>
-<h2 id="买1年还是3年的套餐"><a href="#买1年还是3年的套餐" class="headerlink" title="买1年还是3年的套餐"></a>买1年还是3年的套餐</h2><blockquote>
-<p>以下是当时的信息，已经变化,请以实际为准</p>
-</blockquote>
-<p>如果你点进去的话，会看到他们都会有批量购买3年的套餐，还会折上折。</p>
-<p> 我个人推荐一次买3年的那种套餐，因为很多时候买了服务器，往往可能开始玩一段时间就会放下，很有可能等到下一次玩就是一年之后了，这个时候你已经不是新人，再买成本就高了。</p>
-<p>比如你买了一个服务器后，最开始玩可能是搭建一个博客，一年后，可能突然你想写个小程序，需要一个api服务端。这个时候如果你之前买了3年的套餐，可以继续使用而不需要重新去购买。</p>
-<p>目前三个服务商最低配置(1和2G),三年低至：233.29元<br>阿里云 1核CPU 2G 内存 1M 带宽 40G存储的配置， <a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener"><code>3年套餐233.29元</code></a></p>
-<p>腾讯云 1核CPU 2G 内存 1M 带宽 50G存储的配置, <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1062&cps_key=2ca2817c917f7cd22e132a1de16ecf64&from=console" target="_blank" rel="noopener"><code>3年套餐299元</code></a></p>
-<p>华为云 1核CPU 2G 内存 1M 带宽 40G存储的配置, <a href="https://activity.huaweicloud.com/discount_area_v5/index.html?bpName=0624afd8cc8010e00fa6c012ee3ca040&bindType=1&salesID=linlin888" target="_blank" rel="noopener"><code>3年套餐 236.65元</code></a></p>
-<p>从价格上最低配置，腾讯云稍贵一点,因为多10G存储，其实一般来讲，入门玩玩的目的，阿里云的40G也够的了，价格也低，不差那点钱的和有特殊要求可以考虑腾讯云。</p>
-<p>好了，以上是对新手入门选择服务器的建议，其实没有什么特别需要考虑的，因为各大服务商提供给新手的选择都差不多，此文主要给大家一个思路，就是新手入门没必要花太多时间在各个平台商的对比上，另外一个，新手一次性买3年很重要</p>
-<p>挖个坑，下次有时间按场景来写写服务器选择。</p>
-
+          <div class="read-more">
+            <a href="/2020/04/26/a-newbie-how-to-choose-private-cloud-server/" class="read-more-link">阅读更多</a>
+          </div>
         </div></article>
       <article class="post">
     <header class="post-header">
@@ -632,86 +430,9 @@
 <li>试验：个人有应用的一些想法，想快速试验一下</li>
 </ul>
 <p>下面是具体的用法（某一个项目可能包含上面说的多个目的在一起，就不具体划分了）：</p>
-<ul>
-<li>做小程序服务端</li>
-</ul>
-<blockquote>
-<p>小程序现在很火，是很多应用的重要入口，也容易分享导流，小程序可以用云开发是不需要买服务器的，但是不能做后台管理，运维不方便，这个时候需要用云服务器来做后端API的支持</p>
-</blockquote>
-<ul>
-<li>移动App的服务端</li>
-</ul>
-<blockquote>
-<p>和小程序一样，云服务器可以用来跑API</p>
-</blockquote>
-<ul>
-<li>博客</li>
-</ul>
-<blockquote>
-<p>个人博客，没什么好讲的，当然，也可以去用github的page来搭建</p>
-</blockquote>
-<ul>
-<li>试验性网站</li>
-</ul>
-<blockquote>
-<p>如果你有一些想法，比如一些工具性或者内容新的应用想法，想通过网站的方式来呈现，那就需要云服务器</p>
-</blockquote>
-<ul>
-<li>梯（嘘）子（嘘）</li>
-</ul>
-<blockquote>
-<p>这个不多说了，需要买境外的服务器，如果你问我有什么稳定的方案，那咱们不能在这里说。</p>
-</blockquote>
-<ul>
-<li>量化交易机器人</li>
-</ul>
-<blockquote>
-<p>量化交易的学习，如果你不抱着暴发户的心态，还是可以去玩玩的，了解和学习一下常规的量化交易是怎么回事，那么可以买个境外的服务器，跑虚拟货币的量化交易，可以学到很多有趣的知识　</p>
-</blockquote>
-<ul>
-<li>爬虫</li>
-</ul>
-<blockquote>
-<p>这个用途很多，做垂直网站或者机器学习，都需要大量的数据，可以写个爬虫让它帮你抓数据，放在这个服务器上跑</p>
-</blockquote>
-<ul>
-<li>学习linux服务器技术</li>
-</ul>
-<blockquote>
-<p>如果没有用过linux,那么买个服务器，试着搭建一些服务，这是一个很有趣的学习过程</p>
-</blockquote>
-<ul>
-<li>学习网络技术</li>
-</ul>
-<blockquote>
-<p>和服务器技术一样，没什么好说的</p>
-</blockquote>
-<ul>
-<li>搭建jupyter或者jupyterlab环境</li>
-</ul>
-<blockquote>
-<p>喜欢搞AI的同学，在学习机器学习基础知识，比如统计概率学等课程的时候，需要一个实验环境，jupyter无疑是一个非常棒的工具</p>
-</blockquote>
-<blockquote>
-<p>暂时想起这么多，以后想起陆续补充.</p>
-</blockquote>
-<p>那么，另外一个问题，就是面对市面上的<a href="https://www.aliyun.com/minisite/goods?userCode=vfyswx5w&share_source=copy_link" target="_blank" rel="noopener">阿里云</a>、<a href="https://cloud.tencent.com/act/cps/redirect?redirect=1062&cps_key=2ca2817c917f7cd22e132a1de16ecf64&from=console" target="_blank" rel="noopener">腾讯云</a>、<a href="https://activity.huaweicloud.com/discount_area_v5/index.html?bpName=0624afd8cc8010e00fa6c012ee3ca040&bindType=1&salesID=linlin888" target="_blank" rel="noopener">华为云</a> 这些云提供商，还有同学会问怎么选择服务器比较划算，对于上面列的这种入门级的需求，我建议这样考虑：</p>
-<ol>
-<li><p>搭个博客建个个人网站这类需求，怎么便宜怎么来。</p>
-</li>
-<li><p>如果需要跑长时间占用cpu的程序，不要买突发型，要买100%cpu的。</p>
-</li>
-<li><p>要充分利用新人身份，能买3年就买3年。</p>
-</li>
-</ol>
-<p>其他不需要考虑太多，因为你不是做一个大规模或者性能要求强烈的项目，如果你有那么多精力，不如直接投入上面讲的这些具体的项目实践上去，然后随着具体的项目的深入，你的需求才会具体化，这个时候再按照你的真实需求去升级就好。</p>
-<p>那么如果你的真实需求来了，又怎么买更便宜呢？</p>
-<ol>
-<li>换一个服务器提供商，用新人身份去买</li>
-<li>等优惠券或者搞活动的时候一次性买几年的套餐</li>
-</ol>
-<p>好了，还什么等想到在陆续补充。</p>
-
+          <div class="read-more">
+            <a href="/2020/04/08/how-to-playwith-a-private-cloud-server/" class="read-more-link">阅读更多</a>
+          </div>
         </div></article>
       <article class="post">
     <header class="post-header">
@@ -744,61 +465,9 @@
 <p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTUyMWUzYTJiNmM2YmVlMTMucG5n?x-oss-process=image/format,png" alt="k8s的网络模型"></p>
 <p>我们知道，在k8s里面最小的管理单元是pod，一个主机可以跑多个pod，一个pod里面可以跑多个容器。</p>
 <p>如上面所示，一个pod里面所有的容器共享一个网络命名空间(network namespace)，所以，pod里面的容器之间通信，可以直接通过localhost来完成，pod里面的容器之间通过localhost+端口的方式来通信（这和应用程序在宿主机的通信方式是一样的）。</p>
-<p>那么pod和pod之间的通信呢？通常来说，我们给应用程序定死端口会给应用程序水平扩展带来很多不便，所以k8s不会使用定死端口这样的方法，而是采用其他方法来解决pod之间寻址的问题</p>
-<p>每个pod都会有一个自己的ip，可以将Pod像VM或物理主机一样对待。这样pod和pod之间的通信就不需要像容器一样，通过内外端口映射来通信了，这样就避免了端口冲突的问题。</p>
-<p>特殊的情况下（比如运维做网络检测或者程序调试），可以在pod所在的宿主机想向pod的ip+端口发起请求，这些请求会转发到pod的端口，但是pod本身它自己是不知道端口的存在的。</p>
-<p>因此，k8s的网络遵循以下原则：</p>
-<ul>
-<li>一个节点的pod和其他节点的pod通信不需要通过做网络地址转换（NAT）</li>
-<li>一个节点上所有的agent控制程序（如deamon和kubelet）可以和这个节点上的pod通信</li>
-<li>节点主机网络中的Pod可以与其他所有节点上的所有Pod通信，而无需NAT</li>
-</ul>
-<p>把上面这个pod替换成容器也是成立的，因为pod里面的容器和pod共享网络。</p>
-<p>基本上的原则就是，k8s的里面的pod可以自由的和集群里面的任何其他pod通信（即使他们是部署在不同的宿主机），而且pod直接的通信是直接使用pod自己的ip来通信，他们不知道宿主机的ip，所以，对于pod之间来说，宿主机的网络信息是透明的，好像不存在一样。</p>
-<p>然后，定了这几个原则之后，具体的实现k8s的这个网络模型有好多种实现，我们这里介绍的是<a href="https://github.com/coreos/flannel#flannel" target="_blank" rel="noopener">Flannel</a>，是其中最简单的一种实现。</p>
-<p>Flannel实现pod之间的通信，是通过一种覆盖网络（overlay network），把数据包封装在另外一个网络来做转发，这个覆盖网络可以给每一个pod分配一个独立的ip地址，使他们看起来都是一台具有独立ip的物理主机一样。</p>
-<p>下面这个就是k8s用覆盖网络来实现的一个例子：</p>
-<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTEzYzY4MzA3NTA5YmZjOGYucG5n?x-oss-process=image/format,png" alt="flannel覆盖网络"></p>
-<p>可以看到有3个node，在多个node上建立一个覆盖网络，子网网段是100.95.0.0/16,然后，最终到容器级别，每个容器在这个网段里面获取到一个独立的ip。而宿主机所在的局域网络的网段是172.20.32.0/19</p>
-<p>看这两个网段，就知道，fannel给这个集群创建了一个更大的网络给pod使用，可以容纳的主机数量达到65535（2^16）个。</p>
-<p>对于每个宿主机，fannel给每个了一个小一点的网络100.96.x.0/24，提供给每个这个宿主机的每一个pod使用，也就是说，每一个宿主机可以有256(2^8)个pod。docker默认的网桥docker0用的就是这个网络，也就是所有的docker通过docker0来使用这个网络。即使说，对于容器来说，都是通过docker0这个桥来通信，和我们平常单机的容器是一样的（如果你不给创建的容器指定网络的话，默认用的是docker0，参考我以前写的关于<a href="https://www.jianshu.com/p/0330bd150d1a" target="_blank" rel="noopener">docker bridge</a>的文章）</p>
-<p>那么，对于同一个host里面的容器通信，我们上面说了是通过这个台宿主机的里面的docker0这个网桥来通信。那对于跨宿主机，也即是两个宿主机之间的容器是怎么通信的呢？fannel使用了宿主机操作系统的kernel route和UDP（这是其中一种实现）包封装来完成。下图演示了这个通信过程：</p>
-<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTE3ZWQyY2Y2MTlkMjdjNDQucG5n?x-oss-process=image/format,png" alt="fannel网络中跨宿主机的容器通信"></p>
-<p>如图所示，100.96.1.2(container-1) 要和100.96.2.3(container-2)通信，两个容器分别处于不同的宿主机。<br>假设有一个包是从100.96.1.2发出去给100.96.2.3，它会先经过docker0，因为docker0这个桥是所有容器的网关。 然后这个包会经过route table处理，转发出去到局域网172.20.32.0/19.  而这个route table的对应处理这类包的规则又是从哪里来的呢？它们是由fannel的一个守护程序flanneld创建的。</p>
-<p>每一台宿主机都会跑一个flannel的deamon的进程，这个进程的程序会往宿主机的route table里面写入特定的路由规则，这个规则大概是这样的。</p>
-<p>Node1的route table</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">admin@ip-172-20-33-102:~$ ip route</span><br><span class="line">default via 172.20.32.1 dev eth0</span><br><span class="line">100.96.0.0&#x2F;16 dev flannel0  proto kernel  scope link  src 100.96.1.0</span><br><span class="line">100.96.1.0&#x2F;24 dev docker0  proto kernel  scope link  src 100.96.1.1</span><br><span class="line">172.20.32.0&#x2F;19 dev eth0  proto kernel  scope link  src 172.20.33.102</span><br></pre></td></tr></table></figure>
-
-<p>图例的数据包发出去的目标地址是100.96.2.3,它属于网段100.96.0.0/16,这个目标地址命中第二条规则，也就是这个包会发到flannel0这个设备（dev），这<code>flannel0</code>是一个TUN设备。是在内核里面的一个<a href="https://segmentfault.com/a/1190000009249039" target="_blank" rel="noopener">虚拟网络设备（虚拟网卡）</a>。</p>
-<p>在内核（kernel）里面，有两种虚拟网卡设备，分别是TUN和TAP,其中TAP处理的是第二层（数据链路层）的帧，而TUN处理的是第三层（网络层）的ip包。</p>
-<p>应用程序可以绑定到TUN和TAP设备，内核会把数据通过TUN或者TAP设备发送给这些程序，反过来，应用程序也可以通过TUN和TAP向内核写入数据，进而由内核的路由处理这些发出去的数据包。</p>
-<p>那么上面这个<code>flannel0</code>就是一个这样的TUN设备。这个设备连到的是一个flannel的守护进程程序<code>flanneld</code></p>
-<p>而这个<code>flanneld</code>是干嘛的呢？它可以接受所有发往<code>flannel0</code>这个设备的数据包，然后做数据封装处理，它的封装的逻辑也很简单，就是根据<code>目标地址</code>，找到这个这地址对应的在整个flannel网络里面对应<code>物理ip和端口</code>（这里是Node2对应的物理ip），然后增加一个包头，增加的包头里面<code>目标地址</code>为这个<code>实际的物理ip和端口</code>（当然源地址也改成了局域网络的ip），将原来的数据包嵌入在新的数据包中，然后再把这个封装后的包扔回去给内核，内核根据目标地址去路由规则匹配规则，发现目标地址ip是172.20.54.98,端口是8285. 根据ip匹配不到任何特定的规则，就用第一条default（默认）的规则，通过eth0这个物理网卡，把数据包发给局域网（这里是UDP广播出去）</p>
-<p>当Node2的收到这个包后，然后根据<code>端口8285</code>发现他的目标地址原来是发给flanneld的，然后就直接交给flanneld这程序，flanneld收到包后，把包头去掉，发现原来目标地址是100.96.2.3，然后就交换flannel0，flannel0把这个解开后的原包交给内核，内核发现它的目标地址是100.96.2.3，应该交给docker0来处理。（图例里面画的是直接由flannel0交给docker0，没有图示出内核，实际上flannel0是一个TUN设备，是跑在内核的，数据经过它后可以交给内核，由内核根据路由决定进一步怎么forward）</p>
-<p>以上就是这个通信的过程，那么这里有一个问题： flanneld是怎么知道100.96.2.3对应的目标地址是172.20.54.98:8285的呢？</p>
-<p>这是因为flanneld维护了一个映射关系，它没创造一个虚拟的容器ip（分配给容器新ip的时候），它就知道这个容器的ip实际上是在哪台宿主机上，然后把这个映射关系存储起来，在k8s里面flanneld存储的这个映射关系放在etd上，这就是为什么flanneld为什么知道这个怎么去封装这些包了，下面就是etcd里面的数据的：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">admin@ip-172-20-33-102:~$ etcdctl ls &#x2F;coreos.com&#x2F;network&#x2F;subnets</span><br><span class="line">&#x2F;coreos.com&#x2F;network&#x2F;subnets&#x2F;100.96.1.0-24</span><br><span class="line">&#x2F;coreos.com&#x2F;network&#x2F;subnets&#x2F;100.96.2.0-24</span><br><span class="line">&#x2F;coreos.com&#x2F;network&#x2F;subnets&#x2F;100.96.3.0-24</span><br><span class="line">admin@ip-172-20-33-102:~$ etcdctl get &#x2F;coreos.com&#x2F;network&#x2F;subnets&#x2F;100.96.2.0-24</span><br><span class="line">&#123;&quot;PublicIP&quot;:&quot;172.20.54.98&quot;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>看上面这个数据，etcd里面存储的100.96.2.0-24这个网段的容器是放在172.20.54.98这台宿主机上的。</p>
-<p>那么还有一个问题，端口8285又是怎么知道的? </p>
-<p>这个很简单，flanneld的默认监听的端口就是这个8285端口，flanneld启动的时候，就监听了UDP端口8285. 所以发给Node2：8285的所有UDP数据包会，flanneld这个进程会直接处理，如何去掉包头就还原出来原来的包了，还原后交给TUN设备flannel0,由flannel0交给内核，内核根据Node2的路由规则交给docker0（Node2的路由规则和node1是基本上一样的，除了第三位的网段标识不一样，一个是100.96.1一个是100.92.2）：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">admin@ip-172-20-54-98:~$ ip route</span><br><span class="line">default via 172.20.32.1 dev eth0</span><br><span class="line">100.96.0.0&#x2F;16 dev flannel0  proto kernel  scope link  src 100.96.2.0</span><br><span class="line">100.96.2.0&#x2F;24 dev docker0  proto kernel  scope link  src 100.96.2.1</span><br><span class="line">172.20.32.0&#x2F;19 dev eth0  proto kernel  scope link  src 172.20.54.98</span><br></pre></td></tr></table></figure>
-
-<p>看Node2的这个规则，flannld去掉包头解出来的原包的目标ip是100.96.2.3,由flannel0交回去给kennel，kennel发现命中第三条规则，所以会把这个包叫给docker0,继而就进入了docker0这个桥的子网了，接下去就是docker的事情了，<a href="https://www.jianshu.com/p/0330bd150d1a" target="_blank" rel="noopener">参考以前写的文章</a>。</p>
-<p>最后一个问题，怎么配置docker去使用100.96.x.0/24这个子网呢，如果是手工创建容器的话，这个也是非常简单的，<a href="https://www.jianshu.com/p/0330bd150d1a" target="_blank" rel="noopener">参考以前写的关于docker bridge的这篇文章</a>，但是在k8s里面，是通过配置来实现的：</p>
-<p>flanneld会把子网信息写到一个配置文件<code>/run/flannel/subnet.env</code>里</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">admin@ip-172-20-33-102:~$ cat &#x2F;run&#x2F;flannel&#x2F;subnet.env</span><br><span class="line">FLANNEL_NETWORK&#x3D;100.96.0.0&#x2F;16</span><br><span class="line">FLANNEL_SUBNET&#x3D;100.96.1.1&#x2F;24</span><br><span class="line">FLANNEL_MTU&#x3D;8973</span><br><span class="line">FLANNEL_IPMASQ&#x3D;true</span><br></pre></td></tr></table></figure>
-
-<p>docker会使用这个配置的环境变了来作为它的bridge的配置</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dockerd --bip&#x3D;$FLANNEL_SUBNET --mtu&#x3D;$FLANNEL_MTU</span><br></pre></td></tr></table></figure>
-
-<p>以上，就是k8s如何使用flannel网络来跨机器通信的原理，总体来讲，由于flanneld这个守护神干了所有的脏活累活（其实已经是k8s的网络实现里面最简单的一种了），使得pod和容器能够连接另外一个pod或者容器变得非常简单，就像连一个大局域网里面任意以太主机一样，他们只需要知道对方的虚拟ip就可以直接通信了，不需要做<br>NAT等复杂的规则处理。</p>
-<p>那么性能怎么样？</p>
-<p>新版本的flannel不推荐在生产环境使用UDP的包封装这种实现。只用它来做测试和调试用，因为它的性能表现和其他的实现比差一些。</p>
-<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLWY1OTFiMzk4MDQ4YTc1MTcucG5n?x-oss-process=image/format,png" alt="flannel0 利用的TUN设备做包封装原理"></p>
-<p>看上面这个图解，一个upd包需要来回在用户空间(user space)和内核空间(kennel space)复制3次，这会大大增加网络开销。</p>
-<p><a href="https://github.com/coreos/flannel/blob/master/Documentation/backends.md" target="_blank" rel="noopener">官方的文档</a>里面可以看到其他的包转发实现方式，可以进一步阅读,其中host-gw的性能比较好，它是在第二层去做数据包处理。</p>
-
+          <div class="read-more">
+            <a href="/2020/03/27/understanding-k8s-flannel-networking/" class="read-more-link">阅读更多</a>
+          </div>
         </div></article>
       <nav class="pagination"></nav></section></div></div>
       </main>
