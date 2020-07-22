@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="NAT探珠"/><meta name="keywords" content="阿里云，腾讯云，华为云，云主机，云服务器，对比，比较，评测" /><link rel="alternate" href="/default" title="Noosphere"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://noosphere.site/2020/03/22/what-is-nat/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_analytics">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?438bb344f6f5031be90f213101b87127";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script><!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-170909162-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-170909162-1');
+</script><script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script src="//cdn1.lncld.net/static/js/3.1.1/av-min.js"></script>
+  <script id="leancloud">
+    AV.init({
+      appId: "AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz",
+      appKey: "GTE9k7Cyl9mtVbUHbvdIxXvc"
+    });
+  </script><script>
+  window.config = {"leancloud":{"app_id":"AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz","app_key":"GTE9k7Cyl9mtVbUHbvdIxXvc"},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>NAT探珠 - Noosphere</title>
+  <meta name="generator" content="Hexo 4.2.1"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Noosphere</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a><a href="/archives/">
+        <li class="mobile-menu-item">归档
+          </li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签
+          </li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类
+          </li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Noosphere</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            归档
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/tags/">
+            标签
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/categories/">
+            分类
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/about/">
+            关于
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">NAT探珠
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-03-22
+        </span><span class="post-category">
+            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/03/22/what-is-nat/"
+             data-title="NAT探珠">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#概要"><span class="toc-text">概要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NAT的种类"><span class="toc-text">NAT的种类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#传统NAT-出站NAT"><span class="toc-text">传统NAT(出站NAT)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BASIC-NAT"><span class="toc-text">BASIC NAT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#NAPT"><span class="toc-text">NAPT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#docker和wireshark抓包实例演示"><span class="toc-text">docker和wireshark抓包实例演示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#查看宿主机的NAT规则"><span class="toc-text">查看宿主机的NAT规则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用conntrack看当前链接的映射关系"><span class="toc-text">用conntrack看当前链接的映射关系</span></a></li></ol>
+    </div>
+  </div><div class="post-content"><h2 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h2><p>NAT的全称是 <strong>N</strong>etwork <strong>A</strong>ddress <strong>T</strong>ranslation,　其实看英文名，就知道它的大概意思：网络地址转换。</p>
+<p>严格来说，</p>
+<ul>
+<li>这个<strong>A</strong>ddress,包括了IP地址和端口。</li>
+<li>而这个<strong>T</strong>ranslation,则包括来来<strong>源地址和目的地址</strong>，以及来<strong>源端口和目的端口</strong>这4者之间的转换</li>
+</ul>
+<p>那么<strong>NAT规则</strong>其实定义的就是这<strong>4者的映射关系</strong>,告诉路由器应该怎么去转换(Translation)</p>
+<p>那么什么时候会用到NAT技术呢，答案是，从一个网络到另外一个网络，有一些文章在写NAT的时候，常讲的是外网（互联网）到私网(私域子网)的通信的时候，其实这只是其中一种场景，实际上，只要是两个网络间需要通信，都可以用NAT来做。</p>
+<p>下面这个图讲的就是互联网和私网<strong>这个场景</strong>的NAT</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> \ | &#x2F;                  .                               &#x2F;</span><br><span class="line">+---------------+  WAN     .           +-----------------+&#x2F;</span><br><span class="line">|Regional Router|----------------------|Stub Router w&#x2F;NAT|---</span><br><span class="line">+---------------+          .           +-----------------+\</span><br><span class="line">                           .                      |        \</span><br><span class="line">                           .                      |  LAN</span><br><span class="line">                           .               ---------------</span><br><span class="line">                     Stub border</span><br><span class="line"></span><br><span class="line">     Figure 1: A typical NAT operation scenario</span><br></pre></td></tr></table></figure>
+
+<p>这个图是从NAT的<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663">规范rfc.2663</a> 复制过来的，其中WAN就是广域网，LAN是一个局域网，LAN通过路由器连接到WAN,那么要在WAN和LAN之间通信，那就通过的在路由器里面做数据包的NAT转换。</p>
+<p>NAT的地址转换技术有很多种类，但这些技术一般都具备下面这3个特征：</p>
+<ul>
+<li><strong>透明地址分配</strong>，就是定义外网和内网的地址的映射关系</li>
+<li>通过地址转换进行透明路由（这里的路由指的是数据包的转发，而不是指交换路由信息）</li>
+<li>ICMP的错误包的payload转换</li>
+</ul>
+<p>那么<strong>透明地址分配</strong>的规则是这个这些技术里面的关键点，这种地址分配又分为:</p>
+<ul>
+<li>静态地址分配：这是一种one-to-one的映射关系，这种映射关系明确、简单，不需要在地址转换翻译的过程中管理会话，发出去和回复回来的数据包都有明确的关系。</li>
+<li>动态地址分配：非one-to-one的映射关系，一个或者少量的外网地址分配个一个私网的一堆主机，这种情况，则需要通过会话来明确这个映射关系，那么就需要管理会话，这样才知道回复的数据包对应的是哪台主机发出去的（通过会话来查找映射关系，映射关系会话开始的时候就确立了）</li>
+</ul>
+<h2 id="NAT的种类"><a href="#NAT的种类" class="headerlink" title="NAT的种类"></a>NAT的种类</h2><p>NAT根据他的通信种类，又分为4类：</p>
+<ul>
+<li><strong>传统NAT或出站NAT</strong>:　会话从私有网络发起，是<strong>单向</strong>的，<strong>出站方向</strong>的这种会话</li>
+<li>双向NAT：会话可以从无论是公有网络还是私有网络发起都行,是<strong>双向的</strong></li>
+<li>两次NAT：两次NAT是NAT的一个变种，它在转换过程中，把数据包里面源地址和目标地址都给改了，这种情况是因为两个网络的地址有冲突，比如两个网络都是同一个网段，而且主机的地址都一样</li>
+<li>多宿主NAT：解决NAT路由的单点故障问题而衍生出来的一种NAT技术</li>
+</ul>
+<p>这么多NAT,对我们最经常需要用到的是传统NAT(出站NAT),下面我们重点讲这种NAT技术</p>
+<h2 id="传统NAT-出站NAT"><a href="#传统NAT-出站NAT" class="headerlink" title="传统NAT(出站NAT)"></a>传统NAT(出站NAT)</h2><p>而传统的NAT又分为:</p>
+<ul>
+<li>Basic NAT,需要一个外部的IP池拿来和做转换，不需要端口参与，要求对每一个当前连接都要对应一个公网IP地址，这种NAT在转换的阶段，指修改IP、ip头的checksum以及一切更高级别和IP相关的checksum(如TCP、UDP、ICMP的header的checksum)的值(使数据包看起来合法)，<strong>一般来讲你有足够多的外网ip可以用来对应你的内网主机，那就用这种，</strong></li>
+<li>NAPT, NAPT是Net Address Port Translation,　需要端口参与到映射关系里，<strong>为什么需要端口参数呢，因为你的外网ip数量不足以对应到你内网的主机数量，所以需要共享外网IP</strong>.</li>
+</ul>
+<p>NAPT的技术有根据地址转换过程阶段分为</p>
+<ul>
+<li>DNAT,数据包发出去的时候，修改的是目标IP地址,所以叫做Destination NAT,简称DNAT</li>
+<li>SNAT, 数据包发出去的时候，修改的是源IP地址，所以叫做Source NAT,简称SNAT(但是只看缩写的话,SNAT会有很多其他的定义，有一些厂商，比如WatchGuard,SNAT代表的是Static NAT)</li>
+</ul>
+<h2 id="BASIC-NAT"><a href="#BASIC-NAT" class="headerlink" title="BASIC NAT"></a>BASIC NAT</h2><p>下面这个图分别演示了路由器在转换过程中的SNAT和DNAT</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac411fee0645?w=720&h=363&f=jpeg&s=45753" alt="image"></p>
+<p>SNAT阶段：由于私网对外只有一个IP(一般是拨号拿来的或者运营商给静态分配的)，私网的主机A在给公网发出去请求的给Web Server的时候，它的这个请求的数据包先经过路由器，路由器对会把它的地址改为私网对外的唯一的对外的公网地址202.20.65.5，然后在发给Web Server</p>
+<p>DNAT阶段: Web Server收到请求后，开始响应，这个时候它响应的数据包的目标地址就变成了它私网的唯一的对外的公网地址202.20.65.5,但是，路由器收到这个数据包后，要把他转给这个包发起者192.168.1.2,就必须包目的地址改为192.168.1.2然后再发出去，这样主机A才会接受这个包（这里涉及同一个子网到数据链路层包广播的问题）</p>
+<p>那么，这里又有一个问题，在DNAT阶段，路由器是怎么知道，这个报应该把他的目的地址转换位192.168.1.2呢？这里就涉及到上面所说会话管理的问题，路由器（或者说NAT网关）在会话开始的阶段，在第一个个包发出去，它就确认了会话的方向（第一个包的方向就是会话的方向）和对应关系（这里讲的会话的定义是，一小撮用来表达怎么用来完成一个转换的流量集合，这个集合定义为一个会话）</p>
+<p>到这里，又涉及到一个概念是Session flow和packet low的对比(NAT用的Session flow),这里不细讲了，可以直接看<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663%23section-2.3">rfc规范的这部分</a></p>
+<p>在传输层里面:</p>
+<ol>
+<li>如果是TCP协议，每个TCP会话的第一个数据包尝试建立一个会话 并包含连接启动信息。（这里涉及到3次握手的过程。TCP Session的确立，是在第一个包含这SYN标志位，而有没有ACK标志位出现后就确认，在TCP的协议里，除了第一个SYNC包，除了其他的包都必须包含ACK标志位）</li>
+</ol>
+<p>2. 如果是UDP又是另外一码事，这里不细讲,<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663%23section-2.5">看rfc规范吧</a></p>
+<p>还有关于TCP和UDP详细的会话结束的定义和生命周期，<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663%23section-2.6">看rfc规范这里</a></p>
+<p>总的来讲，就是NAT会建立一个session或者connection 跟踪的机制，来跟踪哪个报应该转换到内部的哪个个主机IP</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120070ca8?w=633&h=436&f=jpeg&s=31619" alt="image"></p>
+<p>这个track table 如果，是外网IP足够多的话，那就用静态分配技术，使内外网IP一对一，如果外网IP不够多，那就用动态分配，如何根据这个对照表来动态转换</p>
+<h2 id="NAPT"><a href="#NAPT" class="headerlink" title="NAPT"></a>NAPT</h2><p>大家看上面这个图很快就会发现另外一个问题，如果内网里面有两个主机同时请求Web Server,那怎么转换呢，这个时候，可以把端口作为额外信息加入这个映射表，这个就是NAPT了</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac412087b129?w=720&h=548&f=jpeg&s=40877" alt="image"></p>
+<p>看上图，即使主机A和主机B请求的源端口一样，路由器也可以将他们转换成不一样的的端口，如何在发出去，如何收到Server回复的数据包的时候，再按照转换的规则，原路转换回去就好</p>
+<h2 id="docker和wireshark抓包实例演示"><a href="#docker和wireshark抓包实例演示" class="headerlink" title="docker和wireshark抓包实例演示"></a>docker和wireshark抓包实例演示</h2><p>下面我们用docker建一个有子网络位192.168.5.0的子网的容器，如何在容器它里面去访问一个网站，并通过wireshark来抓这个包看具体是怎么转换的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 新建一个桥接子网</span><br><span class="line">docker network create -d bridge --subnet 192.168.5.0&#x2F;24 --gateway 192.168.5.1 test_bridge1</span><br><span class="line"></span><br><span class="line"># 新建一个名位box 1的容器，并加入这个网络</span><br><span class="line">docker run --name box1 -p 8082:80 -it --rm  --network&#x3D;test_bridge1 busybox sh</span><br></pre></td></tr></table></figure>
+
+<p>如何我们在宿主机，看看这个私有网络的网卡是哪个</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">route -n</span><br><span class="line">内核 IP 路由表</span><br><span class="line">目标            网关            子网掩码        标志  跃点   引用  使用 接口</span><br><span class="line">192.168.5.0     0.0.0.0    255.255.255.0   U     0      0        0 br-6edc31410314</span><br></pre></td></tr></table></figure>
+
+<p>接着，用wireshark监控这个网卡</p>
+<p>并在box 1这个容器里面区去访问外网</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget www.baidu.com</span><br></pre></td></tr></table></figure>
+
+<p>然后下面这个截图是wireshark的抓包信息</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120acbf74?w=581&h=197&f=jpeg&s=37560" alt="image"></p>
+<p>可以看到，前面是访问dns，如何接下来就是建立TCP连接，最后是发起http的Get请求</p>
+<p>可以看到info里面是49982-&gt;80,这个就是NAPT，主机box1用的端口是49982去访问百度的80</p>
+<p>可以展开这个握手包的传输层看看:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120953e09?w=260&h=296&f=jpeg&s=28568" alt="image"></p>
+<p>然后服务器发回握手的第二个包是确认包，我们再看看他的传输层：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120c7ae30?w=267&h=340&f=jpeg&s=35382" alt="image"></p>
+<p>server返回来的包的目的端口是49982，这个就是NAT的映射关系</p>
+<p>实际上，上面这个例子，有几层的NAT,有容器到子网，如何子网到物理机的无线网卡，那么即使你在分别抓这3个地方的包，他们的端口映射是一样的。</p>
+<p>上面这个端口的情况，下面我们来看一下ping 百度的其中一个ip</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping 182.61.200.6</span><br></pre></td></tr></table></figure>
+
+<p>抓容器的包和子网网桥的包和以及宿主机的包对比一下</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac41550f4320?w=533&h=45&f=png&s=14356" alt="image"></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac415b0c08bf?w=533&h=53&f=png&s=13881" alt="image"></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac415c03bf30?w=544&h=49&f=png&s=14761" alt="image"></p>
+<p>容器本身和网桥里面抓包的source ip 是一样的（这个是容器的veth pair实现的机制所致）,IP是192.168.5.2(容器IP)</p>
+<p>而宿主机发出去的source ip以及被NAT网关转换成192.168.3.3，同时也可以看到，回复的ICMP包的地址也同样被按原路转换回去了</p>
+<h2 id="查看宿主机的NAT规则"><a href="#查看宿主机的NAT规则" class="headerlink" title="查看宿主机的NAT规则"></a>查看宿主机的NAT规则</h2><p>上面我们创建容器的时候，绑定了容器box1的80端口到宿主机的8082端口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name box1 -p 8082:80 -it --rm  --network&#x3D;test_bridge1 busybox sh</span><br></pre></td></tr></table></figure>
+
+<p>那这个绑定是怎么回事呢？为什么这样绑定，发给宿主机的8082端口的数据包就会发到容器呢？答案就是NAT，严格来说是宿主机在它的iptables里面增加了DNAT规则，告诉宿主机的iptable，碰到8082的包就发给宿主机的80吧，下面就是这条规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; sudo iptables -S -t nat | grep 8082</span><br><span class="line">-A DOCKER ! -i br-6edc31410314 -p tcp -m tcp --dport 8082 -j DNAT --to-destination 192.168.5.2:80</span><br></pre></td></tr></table></figure>
+
+<p>上面是规则，下面把路由表格列出来</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&gt; sudo iptables -L -t nat</span><br><span class="line">Chain PREROUTING (policy ACCEPT)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line">KUBE-SERVICES  all  --  anywhere             anywhere             &#x2F;* kubernetes service portals *&#x2F;</span><br><span class="line">DOCKER     all  --  anywhere             anywhere             ADDRTYPE match dst-type LOCAL</span><br><span class="line"></span><br><span class="line">Chain INPUT (policy ACCEPT)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line"></span><br><span class="line">Chain OUTPUT (policy ACCEPT)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line">KUBE-SERVICES  all  --  anywhere             anywhere             &#x2F;* kubernetes service portals *&#x2F;</span><br><span class="line">DOCKER     all  --  anywhere            !localhost&#x2F;8          ADDRTYPE match dst-type LOCAL</span><br><span class="line">...</span><br><span class="line">Chain DOCKER (2 references)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line">RETURN     all  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0                 </span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:27017 to:172.18.0.2:27017</span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:8081 to:172.17.0.2:80</span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:8082 to:192.168.5.2:80</span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:8083 to:192.168.5.3:80</span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:8085 to:192.168.6.3:80</span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:8084 to:192.168.5.4:80</span><br></pre></td></tr></table></figure>
+
+<h2 id="用conntrack看当前链接的映射关系"><a href="#用conntrack看当前链接的映射关系" class="headerlink" title="用conntrack看当前链接的映射关系"></a>用conntrack看当前链接的映射关系</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo conntrack -L         </span><br><span class="line">tcp      6 32841 ESTABLISHED src&#x3D;192.168.3.3 dst&#x3D;49.51.200.100 sport&#x3D;58710 dport&#x3D;443 src&#x3D;49.51.200.100 dst&#x3D;192.168.3.3 sport&#x3D;443 dport&#x3D;58710 [ASSURED] mark&#x3D;0 use&#x3D;1</span><br><span class="line">tcp      6 74 TIME_WAIT src&#x3D;10.1.1.1 dst&#x3D;10.1.1.32 sport&#x3D;33634 dport&#x3D;8082 src&#x3D;10.1.1.32 dst&#x3D;10.1.1.1 sport&#x3D;8082 dport&#x3D;33634 [ASSURED] mark&#x3D;0 use&#x3D;1</span><br><span class="line">tcp      6 31706 ESTABLISHED src&#x3D;192.168.3.3 dst&#x3D;49.51.200.100 sport&#x3D;55282 dport&#x3D;443 src&#x3D;49.51.200.100 dst&#x3D;192.168.3.3 sport&#x3D;443 dport&#x3D;55282 [ASSURED] mark&#x3D;0 use&#x3D;1</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://noosphere.site">noosphere</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://noosphere.site/2020/03/22/what-is-nat/">https://noosphere.site/2020/03/22/what-is-nat/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <div class="post-reward">
+    <input type="checkbox" name="reward" id="reward" hidden />
+    <label class="reward-button" for="reward">赞赏支持</label>
+    <div class="qr-code"><label class="qr-code-image" for="reward">
+          <img class="image" src="/images/reward/wechat.png" title="wechat">
+          <br/>
+          <label>微信</label>
+        </label>
+      <label class="qr-code-image" for="reward">
+          <img class="image" src="/images/reward/alipay.png" title="alipay">
+          <br/>
+          <label>支付宝</label>
+        </label>
+      </div>
+  </div><footer class="post-footer">
+        <div class="post-tags">
+            <a href="/tags/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
+            <a href="/tags/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </div>
+        
+        <nav class="post-nav"><a class="prev" href="/2020/03/27/what-is-net-mask/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">什么是子网掩码？</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    <a class="next" href="/2020/03/01/macos-freebsd-router-ruler/">
+        <span class="next-text nav-default">mac os (freebsd)的路由规则学习</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"><div id="gitalk-container"></div>
+    </div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="https://github.com/noosphere-coder" target="_blank" rel="noopener" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even" target="_blank" rel="noopener">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2020<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">noosphere</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css"/>
+
+
+<script src="//cdn.jsdelivr.net/npm/js-md5@0.7.3/src/md5.min.js"></script>
+
+<script>
+  var gitalk = new Gitalk({
+    clientID: '6cc970aab706e685584e',
+    clientSecret: '3b5906d70b4f6a6460bc184aa0dd49822717e06e',
+    repo: 'noosphere-coder.github.io',
+    owner: 'noosphere-coder',
+    admin: ['noosphere-coder'],
+    id: md5(location.pathname),
+    
+      language: 'zh-CN',
+    
+    distractionFreeMode: 'true'
+  });
+  gitalk.render('gitalk-container');
+</script><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>

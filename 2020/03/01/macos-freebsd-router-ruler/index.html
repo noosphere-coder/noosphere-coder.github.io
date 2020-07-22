@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="mac os (freebsd)的路由规则学习"/><meta name="keywords" content="阿里云，腾讯云，华为云，云主机，云服务器，对比，比较，评测" /><link rel="alternate" href="/default" title="Noosphere"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://noosphere.site/2020/03/01/macos-freebsd-router-ruler/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_analytics">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?438bb344f6f5031be90f213101b87127";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script><!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-170909162-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-170909162-1');
+</script><script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script src="//cdn1.lncld.net/static/js/3.1.1/av-min.js"></script>
+  <script id="leancloud">
+    AV.init({
+      appId: "AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz",
+      appKey: "GTE9k7Cyl9mtVbUHbvdIxXvc"
+    });
+  </script><script>
+  window.config = {"leancloud":{"app_id":"AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz","app_key":"GTE9k7Cyl9mtVbUHbvdIxXvc"},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>mac os (freebsd)的路由规则学习 - Noosphere</title>
+  <meta name="generator" content="Hexo 4.2.1"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Noosphere</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a><a href="/archives/">
+        <li class="mobile-menu-item">归档
+          </li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签
+          </li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类
+          </li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Noosphere</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            归档
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/tags/">
+            标签
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/categories/">
+            分类
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/about/">
+            关于
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">mac os (freebsd)的路由规则学习
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-03-01
+        </span><span class="post-category">
+            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/03/01/macos-freebsd-router-ruler/"
+             data-title="mac os (freebsd)的路由规则学习">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><p>MacOS的路由表查询不是用我们熟知的route命令，而是使用命令 <code>netstat -r</code> 或者<code>netstat -nr</code>(不做域名解释)来查看</p>
+<blockquote>
+<p>netstat -r<br>Routing tables</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Internet:</span><br><span class="line">Destination        Gateway            Flags        Netif Expire</span><br><span class="line">default            192.168.3.1        UGSc           en0</span><br><span class="line">127                localhost          UCS            lo0</span><br><span class="line">localhost          localhost          UH             lo0</span><br><span class="line">169.254            link#4             UCS            en0      !</span><br><span class="line">192.168.3          link#4             UCS            en0      !</span><br><span class="line">192.168.3.1&#x2F;32     link#4             UCS            en0      !</span><br><span class="line">192.168.3.1        a1:9b:00:00:ea:18  UHLWIir        en0   1165</span><br><span class="line">192.168.3.4        51:00:00:00:ee:18  UHLWIi         en0   1153</span><br><span class="line">192.168.3.5&#x2F;32     link#4             UCS            en0      !</span><br><span class="line">192.168.3.8        a1:1f:00:00:a:88   UHLWIi         en0    795</span><br><span class="line">224.0.0&#x2F;4          link#4             UmCS           en0      !</span><br><span class="line">224.0.0.251        1:0:00:0:0:fb      UHmLWI         en0</span><br><span class="line">239.255.255.250    1:0:00:11:ff:fa    UHmLWI         en0</span><br><span class="line">255.255.255.255&#x2F;32 link#4             UCS            en0      !</span><br><span class="line">如果加-n不解析域名也就是,那么destination就是ip，如:</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>netstat -nr<br>Routing tables</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Internet:</span><br><span class="line">Destination        Gateway            Flags        Netif Expire</span><br><span class="line">default            192.168.3.1        UGSc           en0</span><br><span class="line">127                127.0.0.1          UCS            lo0</span><br><span class="line">127.0.0.1          127.0.0.1          UH             lo0</span><br><span class="line">169.254            link#4             UCS            en0      !</span><br><span class="line">192.168.3          link#4             UCS            en0      !</span><br><span class="line">192.168.3.1&#x2F;32     link#4             UCS            en0      !</span><br><span class="line">192.168.3.1        a1:9b:00:00:ea:18  UHLWIir        en0   1181</span><br><span class="line">192.168.3.4        51:00:00:00:ee:18  UHLWIi         en0    421</span><br><span class="line">192.168.3.5&#x2F;32     link#4             UCS            en0      !</span><br><span class="line">192.168.3.8        a1:1f:00:00:a:88   UHLWIi         en0    669</span><br><span class="line">224.0.0&#x2F;4          link#4             UmCS           en0      !</span><br><span class="line">224.0.0.251        1:0:00:0:0:fb      UHmLWI         en0</span><br><span class="line">239.255.255.250    1:0:00:11:ff:fa    UHmLWI         en0</span><br><span class="line">255.255.255.255&#x2F;32 link#4             UCS            en0      !</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Destination: 目标地址，确切说是用来和一个packet包里面的目标地址做匹配的字段，有3种类型的目标地址, 单个主机、 子网、 以及“<code>default</code>(默认)”<blockquote>
+<ul>
+<li>单个主机:  单个ip</li>
+<li>子网：一个ip段,上面看到的 <code>192.168.3.1/32</code> 就是</li>
+<li>“默认”： 如果packet里面的目标地址没有名字tables里面其他任何一条规则，则使用这个destination=<code>default</code>的规则</li>
+</ul>
+</blockquote>
+</li>
+<li>Gateway:  网关，意思是packet通过哪里发出去，这个要重点理解一下，网关也有3种类型<blockquote>
+<ul>
+<li>单个主机：具备网关路由功能的主机ip</li>
+<li>网络接口（也叫“链路”）: 如上表的<code>link#4</code>,它实际上指向一个数据链路层地址，<code>#4</code>表示第<code>4</code>个网卡接口，可以通过<code>ifconfig</code> 或者 <code>netstat -ni</code>(下面会讲到) 查看，顺序查下来就是了#4就是按顺序看到那个</li>
+<li>以太网物理地址值：如上表的 <code>a1:9b:00:00:ea:18</code> </li>
+</ul>
+</blockquote>
+</li>
+<li>Flags：路由的标志位<blockquote>
+<ul>
+<li>U： Up: 路由处于活动状态。</li>
+<li>H： Host: 路由目标是单个主机。</li>
+<li>G： Gateway: 所有发到目的地的网络传到这一远程系统上， 并由它决定最后发到哪里。</li>
+<li>S： Static: 这个路由是手工配置的，不是由系统自动生成的。</li>
+<li>C： Clone: 生成一个新的路由， 通过这个路由我们可以连接上这些机子。 这种类型的路由通常用于本地网络。</li>
+<li>W： WasCloned: 指明一个路由――它是基于本地区域网络 (克隆) 路由自动配置的。</li>
+<li>L： Link: 路由涉及到了以太网硬件。</li>
+</ul>
+</blockquote>
+</li>
+<li>Netif： 网络接口，如<code>en0</code>，是我的机器默认wifi接口，而<code>lo0</code>表示本机（“<code>回环设备</code>”），也就是这条规则的包不通过Lan来发出</li>
+</ul>
+<p>那么上面</p>
+<p>第一条规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">default            192.168.3.1        UGSc           en0</span><br></pre></td></tr></table></figure>
+<p>标识所有其他规则匹配不到的流量都通过<code>en0</code>发到目的地,也就是网关 <code>192.168.3.1</code>。<code>en0</code>不需要理解包里面最终的的目的地，他只需要知道这个包的栈里面下一个是交给谁就行. </p>
+<p>第二，三条规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127                127.0.0.1          UCS            lo0</span><br><span class="line">127.0.0.1          127.0.0.1          UH             lo0</span><br></pre></td></tr></table></figure>
+
+<p>表示127开头的地址的包不会发出去，都是留在本地，127.0.0.1代表主机自己本身（lo0是回环设备–loopback interface）</p>
+<p>第四五六条规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">169.254            link#4             UCS            en0      !</span><br><span class="line">192.168.3          link#4             UCS            en0      !</span><br><span class="line">192.168.3.1&#x2F;32     link#4             UCS            en0      !</span><br></pre></td></tr></table></figure>
+<p><code>link#4</code> 代表主机上的第4个以太网接口，意思是上面这几个子网的请求通过第四个网络接口在数据链路层直接发出（也就是时候<code>link#4</code>就是<code>en0</code>），基本上这些包在链路层级别，不需要路由，因为会直接发往其他主机都监听的通道（相同的物理网段）上，任何人主机监听可以直接监听物理层的这些通道(相同的物理网段)数据，然后根据地址来接收自己的需要的包（不是发给自己的则直接丢弃）。一般连接到子网的物理网络的主机都会直接监听这类包（被主机路由功能直接加到路由配置里，Flags是<code>C</code>）。</p>
+<p>实际主机的路由通过将发往远程主机的数据包封装到发往路由器的第<code>2</code>层数据包中，从而利用了第<code>2</code>层的优势，然后路由器会将第2层封装解开，检查它是否发往另外一个网络，将其移动到面向外部的接口，并再次作为发往下一个外部局域网（子网）的第<code>2</code>层数据包发送给下一个路由器（或其他主机）。</p>
+<p>如何查看link各个对应什么接口</p>
+<blockquote>
+<p>netstat -ni | grep Link</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">lo0   16384 &lt;Link#1&gt;                       6254194     0  6254194     0     0</span><br><span class="line">gif0* 1280  &lt;Link#2&gt;                             0     0        0     0     0</span><br><span class="line">stf0* 1280  &lt;Link#3&gt;                             0     0        0     0     0</span><br><span class="line">en0   1500  &lt;Link#4&gt;    80:...........:98  3872737     0  3738407     0     0</span><br><span class="line">en1   1500  &lt;Link#5&gt;    82.............c0        0     0        0     0     0</span><br><span class="line">en2   1500  &lt;Link#6&gt;    82:...........:c1        0     0        0     0     0</span><br><span class="line">bridg 1500  &lt;Link#7&gt;    82............:c0        0     0        0     0     0</span><br><span class="line">p2p0  2304  &lt;Link#8&gt;    02:...........:98        0     0        0     0     0</span><br><span class="line">awdl0 1484  &lt;Link#9&gt;    2e:...........:5a     1828     0     1157     0     0</span><br><span class="line">llw0  1500  &lt;Link#10&gt;   2e:...........:5a        0     0        0     0     0</span><br><span class="line">utun0 1380  &lt;Link#11&gt;                            0     0       88     0     0</span><br><span class="line">utun1 2000  &lt;Link#12&gt;                            0     0       88     0     0</span><br><span class="line">utun3 1380  &lt;Link#14&gt;                         4298     0     7034     0     0</span><br><span class="line">utun4 1380  &lt;Link#15&gt;                            0     0        2     0     0</span><br></pre></td></tr></table></figure>
+
+<p>好了 ，那么我们在细看<code>link#4</code>是怎么管理网络的</p>
+<blockquote>
+<p>netstat -i  </p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Name       Mtu   Network       Address            Ipkts Ierrs    Opkts Oerrs  Coll</span><br><span class="line">en0   1500  &lt;Link#4&gt;    80:...........:98  3891788     0  3761878     0     0</span><br><span class="line">en0   1500  192.168.3     192.168.3.5      3891788     -  3761878     -</span><br></pre></td></tr></table></figure>
+<ol>
+<li>这个定义了link#4关联的物理地址是80:………..:98 这个物理接口</li>
+<li>然后他所在的网段是 192.168.3, 自己的ip地址是 5</li>
+</ol>
+<blockquote>
+<p>netstat -i # 断开网络，切换到手机的共享wifi再看看</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Name       Mtu   Network       Address            Ipkts Ierrs    Opkts Oerrs  Coll</span><br><span class="line">en0   1500  &lt;Link#4&gt;    80:...........:98  3891150     0  3760929     0     0</span><br><span class="line">en0   1500  172.20.10&#x2F;28  172.20.10.4      3891150     -  3760929     -     -</span><br></pre></td></tr></table></figure>
+
+<p>切换手机的共享wifi，可以看到网段是<code>10</code>, 范围是<code>28</code>个子网掩码非<code>0</code>的范围（也就是<code>255.255.255.240</code>），自己在这个网段里面的ip是<code>4</code></p>
+<p>第七条规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.3.1        a1:9b:00:00:ea:18  UHLWIir        en0   1181</span><br></pre></td></tr></table></figure>
+
+<p>FreeBSD 会自动识别在同一个以太网中的任何主机， 并为其新增一个路由， 并通过那个以太网接口<code>en0</code>直接与它通讯(FLAGS是<code>H</code>)，这条规则就是自动识别添加进去的。FreeBSD是通过一种叫“路由信息协议（Routing Information Protocol）”的机制来识别这种主机，也就是具备路由功能的主机。</p>
+<p>上面四五六七这几条规则，一般我们把网络断开它们就不见了，因为是路由器功能自动生成的（FALGS是<code>C</code>和<code>W</code>）。</p>
+<p>那么七和四五六这几条有什么区别呢，一般来说，主机已经通过路由广播信息知道了其他主机的信息，然后就直接配置他们的物理地址在路由表里，然后通过<code>en0</code>发出去的给这些其他主机的时候就知道怎么发了（FLAGS:<code>H</code>,也就是目标是单个主机）（第七条），而<code>link#4</code>规则 它不需要知道子网里面他的所有的机器的具体ip，只需要知道一个网段，然后就可以直接广播了（四五六等<code>link#4</code>规则）</p>
+<hr>
+<p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://noosphere.site">noosphere</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://noosphere.site/2020/03/01/macos-freebsd-router-ruler/">https://noosphere.site/2020/03/01/macos-freebsd-router-ruler/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <div class="post-reward">
+    <input type="checkbox" name="reward" id="reward" hidden />
+    <label class="reward-button" for="reward">赞赏支持</label>
+    <div class="qr-code"><label class="qr-code-image" for="reward">
+          <img class="image" src="/images/reward/wechat.png" title="wechat">
+          <br/>
+          <label>微信</label>
+        </label>
+      <label class="qr-code-image" for="reward">
+          <img class="image" src="/images/reward/alipay.png" title="alipay">
+          <br/>
+          <label>支付宝</label>
+        </label>
+      </div>
+  </div><footer class="post-footer">
+        <div class="post-tags">
+            <a href="/tags/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
+            <a href="/tags/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </div>
+        
+        <nav class="post-nav"><a class="prev" href="/2020/03/22/what-is-nat/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">NAT探珠</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"><div id="gitalk-container"></div>
+    </div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="https://github.com/noosphere-coder" target="_blank" rel="noopener" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even" target="_blank" rel="noopener">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2020<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">noosphere</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css"/>
+
+
+<script src="//cdn.jsdelivr.net/npm/js-md5@0.7.3/src/md5.min.js"></script>
+
+<script>
+  var gitalk = new Gitalk({
+    clientID: '6cc970aab706e685584e',
+    clientSecret: '3b5906d70b4f6a6460bc184aa0dd49822717e06e',
+    repo: 'noosphere-coder.github.io',
+    owner: 'noosphere-coder',
+    admin: ['noosphere-coder'],
+    id: md5(location.pathname),
+    
+      language: 'zh-CN',
+    
+    distractionFreeMode: 'true'
+  });
+  gitalk.render('gitalk-container');
+</script><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>

@@ -1010,6 +1010,238 @@
 </blockquote>
 
         </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/03/22/what-is-nat/">NAT探珠</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-03-22
+        </span><span class="post-category">
+            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/03/22/what-is-nat/"
+             data-title="NAT探珠">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h2 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h2><p>NAT的全称是 <strong>N</strong>etwork <strong>A</strong>ddress <strong>T</strong>ranslation,　其实看英文名，就知道它的大概意思：网络地址转换。</p>
+<p>严格来说，</p>
+<ul>
+<li>这个<strong>A</strong>ddress,包括了IP地址和端口。</li>
+<li>而这个<strong>T</strong>ranslation,则包括来来<strong>源地址和目的地址</strong>，以及来<strong>源端口和目的端口</strong>这4者之间的转换</li>
+</ul>
+<p>那么<strong>NAT规则</strong>其实定义的就是这<strong>4者的映射关系</strong>,告诉路由器应该怎么去转换(Translation)</p>
+<p>那么什么时候会用到NAT技术呢，答案是，从一个网络到另外一个网络，有一些文章在写NAT的时候，常讲的是外网（互联网）到私网(私域子网)的通信的时候，其实这只是其中一种场景，实际上，只要是两个网络间需要通信，都可以用NAT来做。</p>
+<p>下面这个图讲的就是互联网和私网<strong>这个场景</strong>的NAT</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> \ | &#x2F;                  .                               &#x2F;</span><br><span class="line">+---------------+  WAN     .           +-----------------+&#x2F;</span><br><span class="line">|Regional Router|----------------------|Stub Router w&#x2F;NAT|---</span><br><span class="line">+---------------+          .           +-----------------+\</span><br><span class="line">                           .                      |        \</span><br><span class="line">                           .                      |  LAN</span><br><span class="line">                           .               ---------------</span><br><span class="line">                     Stub border</span><br><span class="line"></span><br><span class="line">     Figure 1: A typical NAT operation scenario</span><br></pre></td></tr></table></figure>
+
+<p>这个图是从NAT的<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663">规范rfc.2663</a> 复制过来的，其中WAN就是广域网，LAN是一个局域网，LAN通过路由器连接到WAN,那么要在WAN和LAN之间通信，那就通过的在路由器里面做数据包的NAT转换。</p>
+<p>NAT的地址转换技术有很多种类，但这些技术一般都具备下面这3个特征：</p>
+<ul>
+<li><strong>透明地址分配</strong>，就是定义外网和内网的地址的映射关系</li>
+<li>通过地址转换进行透明路由（这里的路由指的是数据包的转发，而不是指交换路由信息）</li>
+<li>ICMP的错误包的payload转换</li>
+</ul>
+<p>那么<strong>透明地址分配</strong>的规则是这个这些技术里面的关键点，这种地址分配又分为:</p>
+<ul>
+<li>静态地址分配：这是一种one-to-one的映射关系，这种映射关系明确、简单，不需要在地址转换翻译的过程中管理会话，发出去和回复回来的数据包都有明确的关系。</li>
+<li>动态地址分配：非one-to-one的映射关系，一个或者少量的外网地址分配个一个私网的一堆主机，这种情况，则需要通过会话来明确这个映射关系，那么就需要管理会话，这样才知道回复的数据包对应的是哪台主机发出去的（通过会话来查找映射关系，映射关系会话开始的时候就确立了）</li>
+</ul>
+<h2 id="NAT的种类"><a href="#NAT的种类" class="headerlink" title="NAT的种类"></a>NAT的种类</h2><p>NAT根据他的通信种类，又分为4类：</p>
+<ul>
+<li><strong>传统NAT或出站NAT</strong>:　会话从私有网络发起，是<strong>单向</strong>的，<strong>出站方向</strong>的这种会话</li>
+<li>双向NAT：会话可以从无论是公有网络还是私有网络发起都行,是<strong>双向的</strong></li>
+<li>两次NAT：两次NAT是NAT的一个变种，它在转换过程中，把数据包里面源地址和目标地址都给改了，这种情况是因为两个网络的地址有冲突，比如两个网络都是同一个网段，而且主机的地址都一样</li>
+<li>多宿主NAT：解决NAT路由的单点故障问题而衍生出来的一种NAT技术</li>
+</ul>
+<p>这么多NAT,对我们最经常需要用到的是传统NAT(出站NAT),下面我们重点讲这种NAT技术</p>
+<h2 id="传统NAT-出站NAT"><a href="#传统NAT-出站NAT" class="headerlink" title="传统NAT(出站NAT)"></a>传统NAT(出站NAT)</h2><p>而传统的NAT又分为:</p>
+<ul>
+<li>Basic NAT,需要一个外部的IP池拿来和做转换，不需要端口参与，要求对每一个当前连接都要对应一个公网IP地址，这种NAT在转换的阶段，指修改IP、ip头的checksum以及一切更高级别和IP相关的checksum(如TCP、UDP、ICMP的header的checksum)的值(使数据包看起来合法)，<strong>一般来讲你有足够多的外网ip可以用来对应你的内网主机，那就用这种，</strong></li>
+<li>NAPT, NAPT是Net Address Port Translation,　需要端口参与到映射关系里，<strong>为什么需要端口参数呢，因为你的外网ip数量不足以对应到你内网的主机数量，所以需要共享外网IP</strong>.</li>
+</ul>
+<p>NAPT的技术有根据地址转换过程阶段分为</p>
+<ul>
+<li>DNAT,数据包发出去的时候，修改的是目标IP地址,所以叫做Destination NAT,简称DNAT</li>
+<li>SNAT, 数据包发出去的时候，修改的是源IP地址，所以叫做Source NAT,简称SNAT(但是只看缩写的话,SNAT会有很多其他的定义，有一些厂商，比如WatchGuard,SNAT代表的是Static NAT)</li>
+</ul>
+<h2 id="BASIC-NAT"><a href="#BASIC-NAT" class="headerlink" title="BASIC NAT"></a>BASIC NAT</h2><p>下面这个图分别演示了路由器在转换过程中的SNAT和DNAT</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac411fee0645?w=720&h=363&f=jpeg&s=45753" alt="image"></p>
+<p>SNAT阶段：由于私网对外只有一个IP(一般是拨号拿来的或者运营商给静态分配的)，私网的主机A在给公网发出去请求的给Web Server的时候，它的这个请求的数据包先经过路由器，路由器对会把它的地址改为私网对外的唯一的对外的公网地址202.20.65.5，然后在发给Web Server</p>
+<p>DNAT阶段: Web Server收到请求后，开始响应，这个时候它响应的数据包的目标地址就变成了它私网的唯一的对外的公网地址202.20.65.5,但是，路由器收到这个数据包后，要把他转给这个包发起者192.168.1.2,就必须包目的地址改为192.168.1.2然后再发出去，这样主机A才会接受这个包（这里涉及同一个子网到数据链路层包广播的问题）</p>
+<p>那么，这里又有一个问题，在DNAT阶段，路由器是怎么知道，这个报应该把他的目的地址转换位192.168.1.2呢？这里就涉及到上面所说会话管理的问题，路由器（或者说NAT网关）在会话开始的阶段，在第一个个包发出去，它就确认了会话的方向（第一个包的方向就是会话的方向）和对应关系（这里讲的会话的定义是，一小撮用来表达怎么用来完成一个转换的流量集合，这个集合定义为一个会话）</p>
+<p>到这里，又涉及到一个概念是Session flow和packet low的对比(NAT用的Session flow),这里不细讲了，可以直接看<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663%23section-2.3">rfc规范的这部分</a></p>
+<p>在传输层里面:</p>
+<ol>
+<li>如果是TCP协议，每个TCP会话的第一个数据包尝试建立一个会话 并包含连接启动信息。（这里涉及到3次握手的过程。TCP Session的确立，是在第一个包含这SYN标志位，而有没有ACK标志位出现后就确认，在TCP的协议里，除了第一个SYNC包，除了其他的包都必须包含ACK标志位）</li>
+</ol>
+<p>2. 如果是UDP又是另外一码事，这里不细讲,<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663%23section-2.5">看rfc规范吧</a></p>
+<p>还有关于TCP和UDP详细的会话结束的定义和生命周期，<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663%23section-2.6">看rfc规范这里</a></p>
+<p>总的来讲，就是NAT会建立一个session或者connection 跟踪的机制，来跟踪哪个报应该转换到内部的哪个个主机IP</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120070ca8?w=633&h=436&f=jpeg&s=31619" alt="image"></p>
+<p>这个track table 如果，是外网IP足够多的话，那就用静态分配技术，使内外网IP一对一，如果外网IP不够多，那就用动态分配，如何根据这个对照表来动态转换</p>
+<h2 id="NAPT"><a href="#NAPT" class="headerlink" title="NAPT"></a>NAPT</h2><p>大家看上面这个图很快就会发现另外一个问题，如果内网里面有两个主机同时请求Web Server,那怎么转换呢，这个时候，可以把端口作为额外信息加入这个映射表，这个就是NAPT了</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac412087b129?w=720&h=548&f=jpeg&s=40877" alt="image"></p>
+<p>看上图，即使主机A和主机B请求的源端口一样，路由器也可以将他们转换成不一样的的端口，如何在发出去，如何收到Server回复的数据包的时候，再按照转换的规则，原路转换回去就好</p>
+<h2 id="docker和wireshark抓包实例演示"><a href="#docker和wireshark抓包实例演示" class="headerlink" title="docker和wireshark抓包实例演示"></a>docker和wireshark抓包实例演示</h2><p>下面我们用docker建一个有子网络位192.168.5.0的子网的容器，如何在容器它里面去访问一个网站，并通过wireshark来抓这个包看具体是怎么转换的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 新建一个桥接子网</span><br><span class="line">docker network create -d bridge --subnet 192.168.5.0&#x2F;24 --gateway 192.168.5.1 test_bridge1</span><br><span class="line"></span><br><span class="line"># 新建一个名位box 1的容器，并加入这个网络</span><br><span class="line">docker run --name box1 -p 8082:80 -it --rm  --network&#x3D;test_bridge1 busybox sh</span><br></pre></td></tr></table></figure>
+
+<p>如何我们在宿主机，看看这个私有网络的网卡是哪个</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">route -n</span><br><span class="line">内核 IP 路由表</span><br><span class="line">目标            网关            子网掩码        标志  跃点   引用  使用 接口</span><br><span class="line">192.168.5.0     0.0.0.0    255.255.255.0   U     0      0        0 br-6edc31410314</span><br></pre></td></tr></table></figure>
+
+<p>接着，用wireshark监控这个网卡</p>
+<p>并在box 1这个容器里面区去访问外网</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget www.baidu.com</span><br></pre></td></tr></table></figure>
+
+<p>然后下面这个截图是wireshark的抓包信息</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120acbf74?w=581&h=197&f=jpeg&s=37560" alt="image"></p>
+<p>可以看到，前面是访问dns，如何接下来就是建立TCP连接，最后是发起http的Get请求</p>
+<p>可以看到info里面是49982-&gt;80,这个就是NAPT，主机box1用的端口是49982去访问百度的80</p>
+<p>可以展开这个握手包的传输层看看:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120953e09?w=260&h=296&f=jpeg&s=28568" alt="image"></p>
+<p>然后服务器发回握手的第二个包是确认包，我们再看看他的传输层：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120c7ae30?w=267&h=340&f=jpeg&s=35382" alt="image"></p>
+<p>server返回来的包的目的端口是49982，这个就是NAT的映射关系</p>
+<p>实际上，上面这个例子，有几层的NAT,有容器到子网，如何子网到物理机的无线网卡，那么即使你在分别抓这3个地方的包，他们的端口映射是一样的。</p>
+<p>上面这个端口的情况，下面我们来看一下ping 百度的其中一个ip</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping 182.61.200.6</span><br></pre></td></tr></table></figure>
+
+<p>抓容器的包和子网网桥的包和以及宿主机的包对比一下</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac41550f4320?w=533&h=45&f=png&s=14356" alt="image"></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac415b0c08bf?w=533&h=53&f=png&s=13881" alt="image"></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac415c03bf30?w=544&h=49&f=png&s=14761" alt="image"></p>
+<p>容器本身和网桥里面抓包的source ip 是一样的（这个是容器的veth pair实现的机制所致）,IP是192.168.5.2(容器IP)</p>
+<p>而宿主机发出去的source ip以及被NAT网关转换成192.168.3.3，同时也可以看到，回复的ICMP包的地址也同样被按原路转换回去了</p>
+<h2 id="查看宿主机的NAT规则"><a href="#查看宿主机的NAT规则" class="headerlink" title="查看宿主机的NAT规则"></a>查看宿主机的NAT规则</h2><p>上面我们创建容器的时候，绑定了容器box1的80端口到宿主机的8082端口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name box1 -p 8082:80 -it --rm  --network&#x3D;test_bridge1 busybox sh</span><br></pre></td></tr></table></figure>
+
+<p>那这个绑定是怎么回事呢？为什么这样绑定，发给宿主机的8082端口的数据包就会发到容器呢？答案就是NAT，严格来说是宿主机在它的iptables里面增加了DNAT规则，告诉宿主机的iptable，碰到8082的包就发给宿主机的80吧，下面就是这条规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; sudo iptables -S -t nat | grep 8082</span><br><span class="line">-A DOCKER ! -i br-6edc31410314 -p tcp -m tcp --dport 8082 -j DNAT --to-destination 192.168.5.2:80</span><br></pre></td></tr></table></figure>
+
+<p>上面是规则，下面把路由表格列出来</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&gt; sudo iptables -L -t nat</span><br><span class="line">Chain PREROUTING (policy ACCEPT)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line">KUBE-SERVICES  all  --  anywhere             anywhere             &#x2F;* kubernetes service portals *&#x2F;</span><br><span class="line">DOCKER     all  --  anywhere             anywhere             ADDRTYPE match dst-type LOCAL</span><br><span class="line"></span><br><span class="line">Chain INPUT (policy ACCEPT)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line"></span><br><span class="line">Chain OUTPUT (policy ACCEPT)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line">KUBE-SERVICES  all  --  anywhere             anywhere             &#x2F;* kubernetes service portals *&#x2F;</span><br><span class="line">DOCKER     all  --  anywhere            !localhost&#x2F;8          ADDRTYPE match dst-type LOCAL</span><br><span class="line">...</span><br><span class="line">Chain DOCKER (2 references)</span><br><span class="line">target     prot opt source               destination         </span><br><span class="line">RETURN     all  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0                 </span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:27017 to:172.18.0.2:27017</span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:8081 to:172.17.0.2:80</span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:8082 to:192.168.5.2:80</span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:8083 to:192.168.5.3:80</span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:8085 to:192.168.6.3:80</span><br><span class="line">DNAT       tcp  --  0.0.0.0&#x2F;0            0.0.0.0&#x2F;0            tcp dpt:8084 to:192.168.5.4:80</span><br></pre></td></tr></table></figure>
+
+<h2 id="用conntrack看当前链接的映射关系"><a href="#用conntrack看当前链接的映射关系" class="headerlink" title="用conntrack看当前链接的映射关系"></a>用conntrack看当前链接的映射关系</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo conntrack -L         </span><br><span class="line">tcp      6 32841 ESTABLISHED src&#x3D;192.168.3.3 dst&#x3D;49.51.200.100 sport&#x3D;58710 dport&#x3D;443 src&#x3D;49.51.200.100 dst&#x3D;192.168.3.3 sport&#x3D;443 dport&#x3D;58710 [ASSURED] mark&#x3D;0 use&#x3D;1</span><br><span class="line">tcp      6 74 TIME_WAIT src&#x3D;10.1.1.1 dst&#x3D;10.1.1.32 sport&#x3D;33634 dport&#x3D;8082 src&#x3D;10.1.1.32 dst&#x3D;10.1.1.1 sport&#x3D;8082 dport&#x3D;33634 [ASSURED] mark&#x3D;0 use&#x3D;1</span><br><span class="line">tcp      6 31706 ESTABLISHED src&#x3D;192.168.3.3 dst&#x3D;49.51.200.100 sport&#x3D;55282 dport&#x3D;443 src&#x3D;49.51.200.100 dst&#x3D;192.168.3.3 sport&#x3D;443 dport&#x3D;55282 [ASSURED] mark&#x3D;0 use&#x3D;1</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/03/01/macos-freebsd-router-ruler/">mac os (freebsd)的路由规则学习</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-03-01
+        </span><span class="post-category">
+            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/03/01/macos-freebsd-router-ruler/"
+             data-title="mac os (freebsd)的路由规则学习">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><p>MacOS的路由表查询不是用我们熟知的route命令，而是使用命令 <code>netstat -r</code> 或者<code>netstat -nr</code>(不做域名解释)来查看</p>
+<blockquote>
+<p>netstat -r<br>Routing tables</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Internet:</span><br><span class="line">Destination        Gateway            Flags        Netif Expire</span><br><span class="line">default            192.168.3.1        UGSc           en0</span><br><span class="line">127                localhost          UCS            lo0</span><br><span class="line">localhost          localhost          UH             lo0</span><br><span class="line">169.254            link#4             UCS            en0      !</span><br><span class="line">192.168.3          link#4             UCS            en0      !</span><br><span class="line">192.168.3.1&#x2F;32     link#4             UCS            en0      !</span><br><span class="line">192.168.3.1        a1:9b:00:00:ea:18  UHLWIir        en0   1165</span><br><span class="line">192.168.3.4        51:00:00:00:ee:18  UHLWIi         en0   1153</span><br><span class="line">192.168.3.5&#x2F;32     link#4             UCS            en0      !</span><br><span class="line">192.168.3.8        a1:1f:00:00:a:88   UHLWIi         en0    795</span><br><span class="line">224.0.0&#x2F;4          link#4             UmCS           en0      !</span><br><span class="line">224.0.0.251        1:0:00:0:0:fb      UHmLWI         en0</span><br><span class="line">239.255.255.250    1:0:00:11:ff:fa    UHmLWI         en0</span><br><span class="line">255.255.255.255&#x2F;32 link#4             UCS            en0      !</span><br><span class="line">如果加-n不解析域名也就是,那么destination就是ip，如:</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>netstat -nr<br>Routing tables</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Internet:</span><br><span class="line">Destination        Gateway            Flags        Netif Expire</span><br><span class="line">default            192.168.3.1        UGSc           en0</span><br><span class="line">127                127.0.0.1          UCS            lo0</span><br><span class="line">127.0.0.1          127.0.0.1          UH             lo0</span><br><span class="line">169.254            link#4             UCS            en0      !</span><br><span class="line">192.168.3          link#4             UCS            en0      !</span><br><span class="line">192.168.3.1&#x2F;32     link#4             UCS            en0      !</span><br><span class="line">192.168.3.1        a1:9b:00:00:ea:18  UHLWIir        en0   1181</span><br><span class="line">192.168.3.4        51:00:00:00:ee:18  UHLWIi         en0    421</span><br><span class="line">192.168.3.5&#x2F;32     link#4             UCS            en0      !</span><br><span class="line">192.168.3.8        a1:1f:00:00:a:88   UHLWIi         en0    669</span><br><span class="line">224.0.0&#x2F;4          link#4             UmCS           en0      !</span><br><span class="line">224.0.0.251        1:0:00:0:0:fb      UHmLWI         en0</span><br><span class="line">239.255.255.250    1:0:00:11:ff:fa    UHmLWI         en0</span><br><span class="line">255.255.255.255&#x2F;32 link#4             UCS            en0      !</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Destination: 目标地址，确切说是用来和一个packet包里面的目标地址做匹配的字段，有3种类型的目标地址, 单个主机、 子网、 以及“<code>default</code>(默认)”<blockquote>
+<ul>
+<li>单个主机:  单个ip</li>
+<li>子网：一个ip段,上面看到的 <code>192.168.3.1/32</code> 就是</li>
+<li>“默认”： 如果packet里面的目标地址没有名字tables里面其他任何一条规则，则使用这个destination=<code>default</code>的规则</li>
+</ul>
+</blockquote>
+</li>
+<li>Gateway:  网关，意思是packet通过哪里发出去，这个要重点理解一下，网关也有3种类型<blockquote>
+<ul>
+<li>单个主机：具备网关路由功能的主机ip</li>
+<li>网络接口（也叫“链路”）: 如上表的<code>link#4</code>,它实际上指向一个数据链路层地址，<code>#4</code>表示第<code>4</code>个网卡接口，可以通过<code>ifconfig</code> 或者 <code>netstat -ni</code>(下面会讲到) 查看，顺序查下来就是了#4就是按顺序看到那个</li>
+<li>以太网物理地址值：如上表的 <code>a1:9b:00:00:ea:18</code> </li>
+</ul>
+</blockquote>
+</li>
+<li>Flags：路由的标志位<blockquote>
+<ul>
+<li>U： Up: 路由处于活动状态。</li>
+<li>H： Host: 路由目标是单个主机。</li>
+<li>G： Gateway: 所有发到目的地的网络传到这一远程系统上， 并由它决定最后发到哪里。</li>
+<li>S： Static: 这个路由是手工配置的，不是由系统自动生成的。</li>
+<li>C： Clone: 生成一个新的路由， 通过这个路由我们可以连接上这些机子。 这种类型的路由通常用于本地网络。</li>
+<li>W： WasCloned: 指明一个路由――它是基于本地区域网络 (克隆) 路由自动配置的。</li>
+<li>L： Link: 路由涉及到了以太网硬件。</li>
+</ul>
+</blockquote>
+</li>
+<li>Netif： 网络接口，如<code>en0</code>，是我的机器默认wifi接口，而<code>lo0</code>表示本机（“<code>回环设备</code>”），也就是这条规则的包不通过Lan来发出</li>
+</ul>
+<p>那么上面</p>
+<p>第一条规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">default            192.168.3.1        UGSc           en0</span><br></pre></td></tr></table></figure>
+<p>标识所有其他规则匹配不到的流量都通过<code>en0</code>发到目的地,也就是网关 <code>192.168.3.1</code>。<code>en0</code>不需要理解包里面最终的的目的地，他只需要知道这个包的栈里面下一个是交给谁就行. </p>
+<p>第二，三条规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127                127.0.0.1          UCS            lo0</span><br><span class="line">127.0.0.1          127.0.0.1          UH             lo0</span><br></pre></td></tr></table></figure>
+
+<p>表示127开头的地址的包不会发出去，都是留在本地，127.0.0.1代表主机自己本身（lo0是回环设备–loopback interface）</p>
+<p>第四五六条规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">169.254            link#4             UCS            en0      !</span><br><span class="line">192.168.3          link#4             UCS            en0      !</span><br><span class="line">192.168.3.1&#x2F;32     link#4             UCS            en0      !</span><br></pre></td></tr></table></figure>
+<p><code>link#4</code> 代表主机上的第4个以太网接口，意思是上面这几个子网的请求通过第四个网络接口在数据链路层直接发出（也就是时候<code>link#4</code>就是<code>en0</code>），基本上这些包在链路层级别，不需要路由，因为会直接发往其他主机都监听的通道（相同的物理网段）上，任何人主机监听可以直接监听物理层的这些通道(相同的物理网段)数据，然后根据地址来接收自己的需要的包（不是发给自己的则直接丢弃）。一般连接到子网的物理网络的主机都会直接监听这类包（被主机路由功能直接加到路由配置里，Flags是<code>C</code>）。</p>
+<p>实际主机的路由通过将发往远程主机的数据包封装到发往路由器的第<code>2</code>层数据包中，从而利用了第<code>2</code>层的优势，然后路由器会将第2层封装解开，检查它是否发往另外一个网络，将其移动到面向外部的接口，并再次作为发往下一个外部局域网（子网）的第<code>2</code>层数据包发送给下一个路由器（或其他主机）。</p>
+<p>如何查看link各个对应什么接口</p>
+<blockquote>
+<p>netstat -ni | grep Link</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">lo0   16384 &lt;Link#1&gt;                       6254194     0  6254194     0     0</span><br><span class="line">gif0* 1280  &lt;Link#2&gt;                             0     0        0     0     0</span><br><span class="line">stf0* 1280  &lt;Link#3&gt;                             0     0        0     0     0</span><br><span class="line">en0   1500  &lt;Link#4&gt;    80:...........:98  3872737     0  3738407     0     0</span><br><span class="line">en1   1500  &lt;Link#5&gt;    82.............c0        0     0        0     0     0</span><br><span class="line">en2   1500  &lt;Link#6&gt;    82:...........:c1        0     0        0     0     0</span><br><span class="line">bridg 1500  &lt;Link#7&gt;    82............:c0        0     0        0     0     0</span><br><span class="line">p2p0  2304  &lt;Link#8&gt;    02:...........:98        0     0        0     0     0</span><br><span class="line">awdl0 1484  &lt;Link#9&gt;    2e:...........:5a     1828     0     1157     0     0</span><br><span class="line">llw0  1500  &lt;Link#10&gt;   2e:...........:5a        0     0        0     0     0</span><br><span class="line">utun0 1380  &lt;Link#11&gt;                            0     0       88     0     0</span><br><span class="line">utun1 2000  &lt;Link#12&gt;                            0     0       88     0     0</span><br><span class="line">utun3 1380  &lt;Link#14&gt;                         4298     0     7034     0     0</span><br><span class="line">utun4 1380  &lt;Link#15&gt;                            0     0        2     0     0</span><br></pre></td></tr></table></figure>
+
+<p>好了 ，那么我们在细看<code>link#4</code>是怎么管理网络的</p>
+<blockquote>
+<p>netstat -i  </p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Name       Mtu   Network       Address            Ipkts Ierrs    Opkts Oerrs  Coll</span><br><span class="line">en0   1500  &lt;Link#4&gt;    80:...........:98  3891788     0  3761878     0     0</span><br><span class="line">en0   1500  192.168.3     192.168.3.5      3891788     -  3761878     -</span><br></pre></td></tr></table></figure>
+<ol>
+<li>这个定义了link#4关联的物理地址是80:………..:98 这个物理接口</li>
+<li>然后他所在的网段是 192.168.3, 自己的ip地址是 5</li>
+</ol>
+<blockquote>
+<p>netstat -i # 断开网络，切换到手机的共享wifi再看看</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Name       Mtu   Network       Address            Ipkts Ierrs    Opkts Oerrs  Coll</span><br><span class="line">en0   1500  &lt;Link#4&gt;    80:...........:98  3891150     0  3760929     0     0</span><br><span class="line">en0   1500  172.20.10&#x2F;28  172.20.10.4      3891150     -  3760929     -     -</span><br></pre></td></tr></table></figure>
+
+<p>切换手机的共享wifi，可以看到网段是<code>10</code>, 范围是<code>28</code>个子网掩码非<code>0</code>的范围（也就是<code>255.255.255.240</code>），自己在这个网段里面的ip是<code>4</code></p>
+<p>第七条规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.3.1        a1:9b:00:00:ea:18  UHLWIir        en0   1181</span><br></pre></td></tr></table></figure>
+
+<p>FreeBSD 会自动识别在同一个以太网中的任何主机， 并为其新增一个路由， 并通过那个以太网接口<code>en0</code>直接与它通讯(FLAGS是<code>H</code>)，这条规则就是自动识别添加进去的。FreeBSD是通过一种叫“路由信息协议（Routing Information Protocol）”的机制来识别这种主机，也就是具备路由功能的主机。</p>
+<p>上面四五六七这几条规则，一般我们把网络断开它们就不见了，因为是路由器功能自动生成的（FALGS是<code>C</code>和<code>W</code>）。</p>
+<p>那么七和四五六这几条有什么区别呢，一般来说，主机已经通过路由广播信息知道了其他主机的信息，然后就直接配置他们的物理地址在路由表里，然后通过<code>en0</code>发出去的给这些其他主机的时候就知道怎么发了（FLAGS:<code>H</code>,也就是目标是单个主机）（第七条），而<code>link#4</code>规则 它不需要知道子网里面他的所有的机器的具体ip，只需要知道一个网段，然后就可以直接广播了（四五六等<code>link#4</code>规则）</p>
+<hr>
+<p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+
+        </div></article>
       <nav class="pagination"></nav></section></div></div>
       </main>
 
