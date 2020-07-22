@@ -159,6 +159,7 @@
 <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>既然要划分子网，要有一个规则，告诉路由器，IP的哪一部分是表示子网，哪一部分表示我在这个子网里面具体的地址</p>
 <p>所以，实际上IP细来讲又分为三部分：网络部分（network）子网段部分(subnetwork)和主机部分(host)</p>
 <p>一般大家喜欢把网络部分和子网部分合并成为网络地址(网络号)，把子网看做是网络的一部分，主机部分称为主机地址（主机号）</p>
+<a id="more"></a>
 <p>通俗理解：</p>
 <ul>
 <li>网络号（subnetwork），表示我住哪个小区</li>
@@ -207,6 +208,7 @@
 <p>所以这个子网的地址数量明显比192.168.0.3/24那个要大多了</p>
 <p>那么的子网掩码也很容易计算，就是前面16位全是1后面16位全是0，换算成10进制就是255.255.0.0</p>
 <p>更多的CIDR/VLSM例子：<br><img src="https://img-blog.csdnimg.cn/20200327201653162.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="2020-03-05 22-33-24 的屏幕截图.png"></p>
+<hr>
 <p><img src="https://img-blog.csdnimg.cn/20200713121642481.jpg" alt="欢迎关注公众号和我互动"></p>
 <blockquote>
 <p>欢迎关注我的公众号和我互动</p>

@@ -157,6 +157,7 @@
 <h2 id="哪些软件使用了桥接技术"><a href="#哪些软件使用了桥接技术" class="headerlink" title="哪些软件使用了桥接技术"></a>哪些软件使用了桥接技术</h2><p>bridge在vm(virtual machine)的领域非常有用，比如docker, k8s, multipass等。</p>
 <p>docker可以帮忙创建很多独立的虚拟容器，那这些容器怎么上网，相互之间怎么通信呢，docker提供多种途径，其中一种就是bridge。</p>
 <p>查看设备上有哪些bridge，可以用brctl命令，如果你的没有这个命令，可用apt或者yum安装** sudo apt install bridge-utils**</p>
+<a id="more"></a>
 <h2 id="查看bridge"><a href="#查看bridge" class="headerlink" title="查看bridge"></a>查看bridge</h2><blockquote>
 <p>brctl show</p>
 </blockquote>
@@ -322,6 +323,7 @@
 
 <p>这样 box1就可以ping 通 box3了</p>
 <p>了解了以上这些原理之后，那么我们可以设计一个这样的网络，把前前后台的容器网络隔离开来，保证安全性<br><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLWRmOTQ1YjdkMzk0MDdlNTEuanBn?x-oss-process=image/format,png" alt="0_f39Sdh-13He13vn7.jpg"></p>
+<hr>
 <p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
 <blockquote>
 <p>欢迎关注我的公众号和我互动</p>

@@ -160,7 +160,7 @@
 <p>那么什么时候会用到NAT技术呢，答案是，从一个网络到另外一个网络，有一些文章在写NAT的时候，常讲的是外网（互联网）到私网(私域子网)的通信的时候，其实这只是其中一种场景，实际上，只要是两个网络间需要通信，都可以用NAT来做。</p>
 <p>下面这个图讲的就是互联网和私网<strong>这个场景</strong>的NAT</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> \ | &#x2F;                  .                               &#x2F;</span><br><span class="line">+---------------+  WAN     .           +-----------------+&#x2F;</span><br><span class="line">|Regional Router|----------------------|Stub Router w&#x2F;NAT|---</span><br><span class="line">+---------------+          .           +-----------------+\</span><br><span class="line">                           .                      |        \</span><br><span class="line">                           .                      |  LAN</span><br><span class="line">                           .               ---------------</span><br><span class="line">                     Stub border</span><br><span class="line"></span><br><span class="line">     Figure 1: A typical NAT operation scenario</span><br></pre></td></tr></table></figure>
-
+<a id="more"></a>
 <p>这个图是从NAT的<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663">规范rfc.2663</a> 复制过来的，其中WAN就是广域网，LAN是一个局域网，LAN通过路由器连接到WAN,那么要在WAN和LAN之间通信，那就通过的在路由器里面做数据包的NAT转换。</p>
 <p>NAT的地址转换技术有很多种类，但这些技术一般都具备下面这3个特征：</p>
 <ul>

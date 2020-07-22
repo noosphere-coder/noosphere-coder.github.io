@@ -212,6 +212,11 @@
 <p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLWY1OTFiMzk4MDQ4YTc1MTcucG5n?x-oss-process=image/format,png" alt="flannel0 利用的TUN设备做包封装原理"></p>
 <p>看上面这个图解，一个upd包需要来回在用户空间(user space)和内核空间(kennel space)复制3次，这会大大增加网络开销。</p>
 <p><a href="https://github.com/coreos/flannel/blob/master/Documentation/backends.md" target="_blank" rel="noopener">官方的文档</a>里面可以看到其他的包转发实现方式，可以进一步阅读,其中host-gw的性能比较好，它是在第二层去做数据包处理。</p>
+<hr>
+<p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
 
       </div>
       <div class="post-copyright">

@@ -157,6 +157,7 @@
 <li>hub本质上是一个多端口中继器，它不管包的内容，只是简单的把某个端口收到的包，再广播给其他所有的端口，所以，一台主机发给另外一台主机的内容会被其他无关的主机监听到。<strong>有安全问题</strong></li>
 </ul>
 <h2 id="网桥-bridge"><a href="#网桥-bridge" class="headerlink" title="网桥(bridge)"></a>网桥(bridge)</h2><p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTMyYTYzODUzNDkyMTZlNWIuanBn?x-oss-process=image/format,png" alt="image"></p>
+<a id="more"></a>
 <ul>
 <li>物理世界桥是用来连接一个河的两边，而计算机世界桥是用来连接两个物理网段的网络</li>
 <li>bridge和switch都工作在OSI的数据第二层（数据链路层），数据包会根据MAC地址来发给指定的端口，不存在hub的那种不管三七二一就广播带来的安全问题</li>
@@ -188,6 +189,7 @@
 </ul>
 <p>那么为什么switch没有继续使用bridge这个名字呢，因为早期的生产商生产的bridge不符合IEEE的规范（规范从来没有定时bridge只有2个端口），后来者未免与他相提并论，后来干脆不用bridge这个词，直接改用switch,但本质是更好的对规范的实现。</p>
 <p>那么以上的这3个物理设备的概念，对应的也存在虚拟的软件实现，如虚拟的bridge网桥，虚拟的交换机，如docker和k8s这种分布式的软件，经常会使用bridge来建立子网以及和宿主机通信等功能</p>
+<hr>
 <p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
 <blockquote>
 <p>欢迎关注我的公众号和我互动</p>

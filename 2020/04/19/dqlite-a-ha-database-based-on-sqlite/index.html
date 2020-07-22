@@ -159,9 +159,10 @@
 <li><p>保持强一致性，用户请求需要在服务器中所有的分区里面完成了一致性才返回</p>
 </li>
 <li><p>但是，不保证每个请求都能得到没有报错的响应</p>
+<a id="more"></a>
+<p>一般，我们用sqlite是这样的：</p>
 </li>
 </ol>
-<p>一般，我们用sqlite是这样的：</p>
 <p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTA0MjQ4ZTg0NmZiMjkxYWEucG5n?x-oss-process=image/format,png" alt="image"></p>
 <p>应用程序直接调用一个单节点的sqlite实例</p>
 <p>使用dqlite,则是这样的</p>
@@ -189,7 +190,9 @@
 <li><p>第一个启动的节点如果崩溃了，leader选举不出来</p>
 </li>
 </ul>
-<p>总的来讲，这个k3s的嵌入式HA方案还是非常值得期待，毕竟在IOT这种蝇级设备里面包mysql或者etcd这种程序还是有点太重了<br><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<p>总的来讲，这个k3s的嵌入式HA方案还是非常值得期待，毕竟在IOT这种蝇级设备里面包mysql或者etcd这种程序还是有点太重了</p>
+<hr>
+<p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
 <blockquote>
 <p>欢迎关注我的公众号和我互动</p>
 </blockquote>
