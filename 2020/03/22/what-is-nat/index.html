@@ -192,7 +192,7 @@
 <li>SNAT, 数据包发出去的时候，修改的是源IP地址，所以叫做Source NAT,简称SNAT(但是只看缩写的话,SNAT会有很多其他的定义，有一些厂商，比如WatchGuard,SNAT代表的是Static NAT)</li>
 </ul>
 <h2 id="BASIC-NAT"><a href="#BASIC-NAT" class="headerlink" title="BASIC NAT"></a>BASIC NAT</h2><p>下面这个图分别演示了路由器在转换过程中的SNAT和DNAT</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac411fee0645?w=720&h=363&f=jpeg&s=45753" alt="image"></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC8zLzI0LzE3MTBhYzQxMWZlZTA2NDU?x-oss-process=image/format,png" alt="image"></p>
 <p>SNAT阶段：由于私网对外只有一个IP(一般是拨号拿来的或者运营商给静态分配的)，私网的主机A在给公网发出去请求的给Web Server的时候，它的这个请求的数据包先经过路由器，路由器对会把它的地址改为私网对外的唯一的对外的公网地址202.20.65.5，然后在发给Web Server</p>
 <p>DNAT阶段: Web Server收到请求后，开始响应，这个时候它响应的数据包的目标地址就变成了它私网的唯一的对外的公网地址202.20.65.5,但是，路由器收到这个数据包后，要把他转给这个包发起者192.168.1.2,就必须包目的地址改为192.168.1.2然后再发出去，这样主机A才会接受这个包（这里涉及同一个子网到数据链路层包广播的问题）</p>
 <p>那么，这里又有一个问题，在DNAT阶段，路由器是怎么知道，这个报应该把他的目的地址转换位192.168.1.2呢？这里就涉及到上面所说会话管理的问题，路由器（或者说NAT网关）在会话开始的阶段，在第一个个包发出去，它就确认了会话的方向（第一个包的方向就是会话的方向）和对应关系（这里讲的会话的定义是，一小撮用来表达怎么用来完成一个转换的流量集合，这个集合定义为一个会话）</p>
@@ -204,10 +204,10 @@
 <p>2. 如果是UDP又是另外一码事，这里不细讲,<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663%23section-2.5">看rfc规范吧</a></p>
 <p>还有关于TCP和UDP详细的会话结束的定义和生命周期，<a href="https://link.zhihu.com/?target=https%3A//tools.ietf.org/html/rfc2663%23section-2.6">看rfc规范这里</a></p>
 <p>总的来讲，就是NAT会建立一个session或者connection 跟踪的机制，来跟踪哪个报应该转换到内部的哪个个主机IP</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120070ca8?w=633&h=436&f=jpeg&s=31619" alt="image"></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC8zLzI0LzE3MTBhYzQxMjAwNzBjYTg?x-oss-process=image/format,png" alt="image"></p>
 <p>这个track table 如果，是外网IP足够多的话，那就用静态分配技术，使内外网IP一对一，如果外网IP不够多，那就用动态分配，如何根据这个对照表来动态转换</p>
 <h2 id="NAPT"><a href="#NAPT" class="headerlink" title="NAPT"></a>NAPT</h2><p>大家看上面这个图很快就会发现另外一个问题，如果内网里面有两个主机同时请求Web Server,那怎么转换呢，这个时候，可以把端口作为额外信息加入这个映射表，这个就是NAPT了</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac412087b129?w=720&h=548&f=jpeg&s=40877" alt="image"></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC8zLzI0LzE3MTBhYzQxMjA4N2IxMjk?x-oss-process=image/format,png" alt="image"></p>
 <p>看上图，即使主机A和主机B请求的源端口一样，路由器也可以将他们转换成不一样的的端口，如何在发出去，如何收到Server回复的数据包的时候，再按照转换的规则，原路转换回去就好</p>
 <h2 id="docker和wireshark抓包实例演示"><a href="#docker和wireshark抓包实例演示" class="headerlink" title="docker和wireshark抓包实例演示"></a>docker和wireshark抓包实例演示</h2><p>下面我们用docker建一个有子网络位192.168.5.0的子网的容器，如何在容器它里面去访问一个网站，并通过wireshark来抓这个包看具体是怎么转换的</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 新建一个桥接子网</span><br><span class="line">docker network create -d bridge --subnet 192.168.5.0&#x2F;24 --gateway 192.168.5.1 test_bridge1</span><br><span class="line"></span><br><span class="line"># 新建一个名位box 1的容器，并加入这个网络</span><br><span class="line">docker run --name box1 -p 8082:80 -it --rm  --network&#x3D;test_bridge1 busybox sh</span><br></pre></td></tr></table></figure>
@@ -220,22 +220,22 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget www.baidu.com</span><br></pre></td></tr></table></figure>
 
 <p>然后下面这个截图是wireshark的抓包信息</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120acbf74?w=581&h=197&f=jpeg&s=37560" alt="image"></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC8zLzI0LzE3MTBhYzQxMjBhY2JmNzQ?x-oss-process=image/format,png" alt="image"></p>
 <p>可以看到，前面是访问dns，如何接下来就是建立TCP连接，最后是发起http的Get请求</p>
 <p>可以看到info里面是49982-&gt;80,这个就是NAPT，主机box1用的端口是49982去访问百度的80</p>
 <p>可以展开这个握手包的传输层看看:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120953e09?w=260&h=296&f=jpeg&s=28568" alt="image"></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC8zLzI0LzE3MTBhYzQxMjA5NTNlMDk?x-oss-process=image/format,png" alt="image"></p>
 <p>然后服务器发回握手的第二个包是确认包，我们再看看他的传输层：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac4120c7ae30?w=267&h=340&f=jpeg&s=35382" alt="image"></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC8zLzI0LzE3MTBhYzQxMjBjN2FlMzA?x-oss-process=image/format,png" alt="image"></p>
 <p>server返回来的包的目的端口是49982，这个就是NAT的映射关系</p>
 <p>实际上，上面这个例子，有几层的NAT,有容器到子网，如何子网到物理机的无线网卡，那么即使你在分别抓这3个地方的包，他们的端口映射是一样的。</p>
 <p>上面这个端口的情况，下面我们来看一下ping 百度的其中一个ip</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping 182.61.200.6</span><br></pre></td></tr></table></figure>
 
 <p>抓容器的包和子网网桥的包和以及宿主机的包对比一下</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac41550f4320?w=533&h=45&f=png&s=14356" alt="image"></p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac415b0c08bf?w=533&h=53&f=png&s=13881" alt="image"></p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/3/24/1710ac415c03bf30?w=544&h=49&f=png&s=14761" alt="image"></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC8zLzI0LzE3MTBhYzQxNTUwZjQzMjA?x-oss-process=image/format,png" alt="image"></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC8zLzI0LzE3MTBhYzQxNWIwYzA4YmY?x-oss-process=image/format,png" alt="image"></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAyMC8zLzI0LzE3MTBhYzQxNWMwM2JmMzA?x-oss-process=image/format,png" alt="image"></p>
 <p>容器本身和网桥里面抓包的source ip 是一样的（这个是容器的veth pair实现的机制所致）,IP是192.168.5.2(容器IP)</p>
 <p>而宿主机发出去的source ip以及被NAT网关转换成192.168.3.3，同时也可以看到，回复的ICMP包的地址也同样被按原路转换回去了</p>
 <h2 id="查看宿主机的NAT规则"><a href="#查看宿主机的NAT规则" class="headerlink" title="查看宿主机的NAT规则"></a>查看宿主机的NAT规则</h2><p>上面我们创建容器的时候，绑定了容器box1的80端口到宿主机的8082端口</p>
