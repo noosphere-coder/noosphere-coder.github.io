@@ -291,6 +291,203 @@
         </div></article>
       <article class="post">
     <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/06/17/how-to-manage-bridge-and-docker-bridge-on-linux/">如何管理linux设备上的bridge(网桥)和docker bridge</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-06-17
+        </span><span class="post-category">
+            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/06/17/how-to-manage-bridge-and-docker-bridge-on-linux/"
+             data-title="如何管理linux设备上的bridge(网桥)和docker bridge">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h2 id="什么是bridge-网桥-？"><a href="#什么是bridge-网桥-？" class="headerlink" title="什么是bridge(网桥)？"></a>什么是bridge(网桥)？</h2><p>bridge是一种技术，可以把一个linux设备上的两块网卡桥接在一起，如何对外表现为一个大的网卡接口，这样做有很多用途</p>
+<p>比如你有两台设备，但是又没有路由器，那么把他们桥接在一起，可以共享其中一台的网络，这样两台都可以上网，这两台设备也可以是vm，不一定是物理设备</p>
+<p>还有一种用途，就是监控两个设备的网络流量，比如用wireshark来监控他们间的流量</p>
+<p>总的来讲，桥接就是将一台计算机插入到已经与较大网络（例如Internet）建立连接的另一台计算机上，然后让这台桥接上去的计算机可以使用联网计算机的连接。</p>
+<h2 id="哪些软件使用了桥接技术"><a href="#哪些软件使用了桥接技术" class="headerlink" title="哪些软件使用了桥接技术"></a>哪些软件使用了桥接技术</h2><p>bridge在vm(virtual machine)的领域非常有用，比如docker, k8s, multipass等。</p>
+<p>docker可以帮忙创建很多独立的虚拟容器，那这些容器怎么上网，相互之间怎么通信呢，docker提供多种途径，其中一种就是bridge。</p>
+<p>查看设备上有哪些bridge，可以用brctl命令，如果你的没有这个命令，可用apt或者yum安装** sudo apt install bridge-utils**</p>
+<h2 id="查看bridge"><a href="#查看bridge" class="headerlink" title="查看bridge"></a>查看bridge</h2><blockquote>
+<p>brctl show</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bridge name	bridge id		STP enabled	interfaces</span><br><span class="line">docker0		8000.0242a8576763	no</span><br></pre></td></tr></table></figure>
+
+<p>上面这个是<strong>docker</strong>的bridge（如果你设备上装有docker的话 就可以看到）</p>
+<p><strong>k8s</strong>的bridge，k8s也可以通过bridge来通信</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bridge name	bridge id		STP enabled	interfaces</span><br><span class="line">cbr0		8000.125a96a00d6c	no		veth461c2da3</span><br><span class="line">							veth4cd7f98e</span><br><span class="line">							veth62b53b2e</span><br><span class="line">							vethb0c3d926</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>k8s创建名为<code>cbr0</code>的网桥，并为每个 pod 创建了一个 veth 对，每个 pod 的主机端都连接到<code>cbr0</code>。 这个 veth 对的 pod 端会被分配一个 IP 地址，该 IP 地址隶属于节点所被分配的 IP 地址范围内。节点的 IP 地址范围则通过配置或控制器管理器来设置。<code>cbr0</code>被分配一个 MTU，该 MTU 匹配主机上已启用的正常接口的最小 MTU (<a href="https://link.zhihu.com/?target=https%3A//k8smeetup.github.io/docs/concepts/cluster-administration/network-plugins/">来自k8s的官方说明</a>)</p>
+</blockquote>
+<p><strong>multipass</strong>的bridge，它也是用bridge来通信</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">bridge name	bridge id		STP enabled	interfaces		</span><br><span class="line">mpqemubr0	8000.065897b80a53	no		mpqemubr0-dummy</span><br><span class="line">							tap-166f18d0005</span><br><span class="line">							tap-1e3511f1cea</span><br><span class="line">							tap-2cc8b34e9b0</span><br><span class="line">							tap-313bf980cb9</span><br><span class="line">							tap-416f9717aeb</span><br><span class="line">							tap-4524e0d94ea</span><br><span class="line">							tap-5abadd4a100</span><br><span class="line">							tap-62fe19d7992</span><br><span class="line">							tap-c1b397bb0d</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建一个bridge"><a href="#创建一个bridge" class="headerlink" title="创建一个bridge"></a>创建一个bridge</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brctl addbr br0</span><br></pre></td></tr></table></figure>
+
+<p>上面命令创建一个名为br0的桥</p>
+<p>接下来我们可以把已有的网卡接口绑定到这个桥上，在这之前可以看看我们有有哪些网卡接口</p>
+<p>可以用这个命令查看</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip addr show</span><br></pre></td></tr></table></figure>
+
+<p>假设上面查出来，有eth0和eth1两个网卡接口，下面我们把他们用命令绑定到一起</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brctl addif br0 eth0 eth1 # eth0和eth1的顺序不重要，不影响结果</span><br></pre></td></tr></table></figure>
+
+<p>这是我们再来绑定的结果</p>
+<blockquote>
+<p>brctl show</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bridge name     bridge id               STP enabled     interfaces</span><br><span class="line">br0             8000.001ec952d26b       yes             eth0</span><br><span class="line">                                                        eth1</span><br></pre></td></tr></table></figure>
+
+<p>就是说eth0和eth1绑定到了br0这个桥上了</p>
+<p>上面命令是临时创建这种关系，如果要永久保留下来，需要在/etc/network/interfaces这个配置文件里面修改</p>
+<blockquote>
+<p>sudo vim /etc/network/interfaces</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"> # The loopback network interface</span><br><span class="line"> auto lo </span><br><span class="line"> iface lo inet loopback</span><br><span class="line"># 上面这两行是系统默认有的， 意思是定义一个回环设备，并且自动启动</span><br><span class="line"></span><br><span class="line"> # Set up interfaces manually, avoiding conflicts with, e.g., network manager</span><br><span class="line"> iface eth0 inet manual # 定义eth0接口 手动启动</span><br><span class="line"> iface eth1 inet manual # 定义eth1接口 手动启动</span><br><span class="line"></span><br><span class="line"> # Bridge setup</span><br><span class="line"> iface br0 inet dhcp # 定义br0这个接口，并且从dhcp获取ip</span><br><span class="line">    bridge_ports eth0 eth1 # 绑定上面定义那两个接口进来</span><br><span class="line"></span><br><span class="line"># 如果希望给这个bridge配置静态ip，可以用下面这个段配置代替上面的bridge配置</span><br><span class="line"> #iface br0 inet static</span><br><span class="line"> #   bridge_ports eth0 eth1</span><br><span class="line"> #       address 192.168.1.2</span><br><span class="line"> #       broadcast 192.168.1.255</span><br><span class="line"> #       netmask 255.255.255.0</span><br><span class="line"> #       gateway 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<p>上面个并设置的接口是手动启动，要通过下面的命令来启动</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifup br0</span><br></pre></td></tr></table></figure>
+
+<h2 id="桥接无线网卡和以太网卡"><a href="#桥接无线网卡和以太网卡" class="headerlink" title="桥接无线网卡和以太网卡"></a>桥接无线网卡和以太网卡</h2><p>有很多无线路由都会拒绝没有认证过的帧，那么我们的以太网卡虽然能通过bridge借用无线网卡连接网络，但是由于它发的帧并没有经过无线路由的认证（因为以太网卡发出去的frames里面MAC地址不是无线网卡向无线路由注册过的地址），所以会被拒绝掉。</p>
+<p>这个时候要借助一种叫做etable的程序，ebtables本质上类似于iptables，不同之处在于它在OSI模型的数据链路层的MAC子层而不是网络层上运行。这允许更改所有帧的源MAC地址。</p>
+<p>要实现这个功能，分两步走</p>
+<ol>
+<li>配置bridge-utils</li>
+</ol>
+<p>2. 配置etable的规则</p>
+<h2 id="配置bridge-utils"><a href="#配置bridge-utils" class="headerlink" title="配置bridge-utils"></a>配置bridge-utils</h2><p>也是在/etc/network/interfaces里面配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pre-up iwconfig wlan0 essid $YOUR_ESSID # wifi的essid(一般和ｓｓｉｄ相同)</span><br><span class="line">bridge_hw $MAC_ADDRESS_OF_YOUR_WIRELESS_CARD　# 无线网卡地址</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>这个配置的意思是启动一个叫wlan0的无线网卡连接到essid上</li>
+</ol>
+<p>2. 设置以太网网卡的MAC地址为无线网卡的MAC地址</p>
+<blockquote>
+<p>以上这些配置命令的说明可以从<a href="https://link.zhihu.com/?target=https%3A//manpages.debian.org/jessie/bridge-utils/bridge-utils-interfaces.5.en.html">bridge-tuils的文档</a>里面找到</p>
+</blockquote>
+<h2 id="配置etable的规则"><a href="#配置etable的规则" class="headerlink" title="配置etable的规则"></a>配置etable的规则</h2><p>先安装etable</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install ebtables</span><br></pre></td></tr></table></figure>
+
+<p>配置规则（etable的规则和iptables差不多）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 这条规则是将所有发送到AP的帧的源MAC地址设置为网桥的MAC地址</span><br><span class="line">ebtables -t nat -A POSTROUTING -o wlan0 -j snat --to-src $MAC_OF_BRIDGE --snat-arp --snat-target ACCEPT</span><br><span class="line"># 下面这两条配规则，要求你得知道网桥后面的每台计算机的MAC和IP</span><br><span class="line">ebtables -t nat -A PREROUTING -p IPv4 -i wlan0 --ip-dst $IP -j dnat --to-dst $MAC --dnat-target ACCEPT</span><br><span class="line">ebtables -t nat -A PREROUTING -p ARP -i wlan0 --arp-ip-dst $IP -j dnat --to-dst $MAC --dnat-target ACCEPT</span><br></pre></td></tr></table></figure>
+
+<p>每次手工输入比较麻烦，也可以通过脚本来弄，<a href="https://link.zhihu.com/?target=https%3A//wiki.debian.org/BridgeNetworkConnections">参考</a></p>
+<h2 id="docker的bridge"><a href="#docker的bridge" class="headerlink" title="docker的bridge"></a>docker的bridge</h2><p>docker容器的bridge比我们上面认识到的bridge要复杂</p>
+<p>首先docker的提供给容器用的网络模式<a href="https://link.zhihu.com/?target=https%3A//docs.docker.com/network/">有好多种</a>:</p>
+<ul>
+<li>none: 没有任何的网卡接口，除了容器自身的loobpack设备lo，通常这种容器用来连接定制的网络驱动</li>
+<li>host: 给独立的容器直接使用宿主机的网络，这种可能会有冲突，容器间没有隔离。</li>
+<li>overlay：覆盖网络，这种网络可以用在swarm集群和独立容器（如networking=host）或者多个docker守护进程上，把他们通过覆盖来相互通信。</li>
+<li>macvlan: 这个涉及到vlan这种虚拟局域网的技术，通过macvlan可以直接给容器分配MAC网卡地址，对于物理网络来说，它就是一个物理的网卡设备（实际上是一个虚拟网卡）,容器的守护进程通过这个网卡地址准确的把流量路由给这个容器，相当于容器直接连接到我们的物理网络</li>
+<li>third-party network plugin：　第三方网络插件</li>
+<li>bridge：docker的bridge,这个是我们要个讲的</li>
+</ul>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTNlOWQ3MzU2NDM4MDM5N2IucG5n?x-oss-process=image/format,png" alt="container_namespaces.png"></p>
+<p>看了网上很多关于docker bridge的介绍，上面这个示意图比较正确，(<a href="https://link.zhihu.com/?target=https%3A//platform9.com/blog/container-namespaces-deep-dive-container-networking/">来自这里</a>)</p>
+<ol>
+<li>首先docker会在宿主机里面创建一个docker0的linux bridge</li>
+<li>然后在创建容器的时候使用veth pair对的技术，会对应在宿主虚拟创建一个虚拟网卡，然后这个网卡和容器里面的网卡一一对应起来，docker的守护(deamon)进程会正确的把发给虚拟网卡的数据路由给对应的容器（一一对应），同时，所有的虚拟网卡会绑定到docker0 这个linux bridge里面（见上面关于linux bridge的介绍），这样的话容器之间就可以相互通信了</li>
+</ol>
+<p>那么宿主机又是怎么样把外部的请求正确的发给veth呢，这是因为在docker0 bridge前面还有一层NAT的技术，通过网络地址端口转换的技术，把发给特定端口的数据，转发给容器，既然如此，那么就必须绑定docker对外暴露什么端口，这就是我们平时定义docker的时候的端口bind干的事</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -p 80:8080 nginx # 把容器的8080端口绑定到宿主机的80端口</span><br></pre></td></tr></table></figure>
+
+<p>如上面这个，把容器的8080端口绑定到宿主机的80端口，那么在进行NAT路由的时候，就可以准确找到容器对应的veth:xx,然后veth又对应到容器的eth0:xx,docker deamon就可以把数组准确的路由进容器里。</p>
+<h2 id="如何查看veth-pair的对应关系"><a href="#如何查看veth-pair的对应关系" class="headerlink" title="如何查看veth pair的对应关系"></a>如何查看veth pair的对应关系</h2><p>查找veth的关系可以通过ip命令来查</p>
+<p>１．在容器里面执行:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt; ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">    link&#x2F;loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1&#x2F;8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">55: eth0@if56: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue </span><br><span class="line">    link&#x2F;ether 02:42:ac:11:00:03 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.3&#x2F;16 brd 172.17.255.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<p>容器里面编号为55的接口eth0是@if56</p>
+<p>2. 在宿主机里面也执行ip a</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; ip a | grep veth</span><br><span class="line">56: veth243b8f2@if55: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue master docker0 state UP group default</span><br></pre></td></tr></table></figure>
+
+<p>宿主机里面56编号的这个接口是@if55</p>
+<p>两者刚好是对应关系，这样看比较麻烦，可以用github上这个<a href="https://link.zhihu.com/?target=https%3A//github.com/micahculpepper/dockerveth">项目</a>,一个命令列出对应关系</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@dockervisor-1 ~]# dockerveth</span><br><span class="line">CONTAINER ID	VETH       	NAMES</span><br><span class="line">60d27ce962ff	vethe353e93	hopeful_bhaskara</span><br><span class="line">d07a2979e69a	vethe4c3cee	silly_meitner</span><br><span class="line">1e8656e195ba	veth1ce04be	thirsty_meitner</span><br></pre></td></tr></table></figure>
+
+<h2 id="在宿主机里面查看DNAT路由规则"><a href="#在宿主机里面查看DNAT路由规则" class="headerlink" title="在宿主机里面查看DNAT路由规则"></a>在宿主机里面查看DNAT路由规则</h2><p>下面这条就是我的主机上建立的一个<strong>8081</strong>到容器<strong>80</strong>端口的DNAT规则，宿主机就是根据这条规则准确的把数据路由到<strong>172.17.0.2</strong>这台容器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; sudo iptables -S -t nat | grep 8081</span><br><span class="line">-A DOCKER ! -i docker0 -p tcp -m tcp --dport 8081 -j DNAT --to-destination 172.17.0.2:80</span><br></pre></td></tr></table></figure>
+
+<p>这个时候，这台容器是插入到docker0这个桥的，<strong>docker0的ip是172.17.0.1</strong></p>
+<h2 id="不推荐在生成环境使用docker0-bridge"><a href="#不推荐在生成环境使用docker0-bridge" class="headerlink" title="不推荐在生成环境使用docker0　bridge"></a>不推荐在生成环境使用docker0　bridge</h2><p>官方不推荐在生成使用docker0这个bridge，取而代之，建议在创建容器的时候使用–network来自动自己创建的network bridge.</p>
+<ol>
+<li>先在宿主机创建自定义的bridge</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create cluster1-net-bridge</span><br></pre></td></tr></table></figure>
+
+<p>2. 创建容器的时候指定bridge</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --name nginx -p 80:8080 -d nginx --network cluster1-net-bridge</span><br><span class="line">docker run --name mongo -d mongo:tag --network cluster1-net-bridge</span><br></pre></td></tr></table></figure>
+
+<p>为什么官方会这样推荐呢，<a href="https://link.zhihu.com/?target=https%3A//docs.docker.com/network/bridge/%23connect-a-container-to-the-default-bridge-network%23differences-between-user-defined-bridges-and-the-default-bridge">原因是</a>:</p>
+<ol>
+<li>docker0在所有的容器里面共享配置，包括MTU和防火墙规则等，对于不同的集群我们可能希望可隔离开来</li>
+<li>docker0默认不能通过容器的名称来通信，而自己创建的桥，如cluster1-net-bridge,可以可以允许通过名称来通信，也就是自己创建的bridge具备dns解析功能，而docker0如果需要有这种功能需要用–link来在创建容器的时候指定，如果有复杂的容器关系，那会非常难以维护。</li>
+<li>自定义桥可以热插拔，在生产状态下改变</li>
+</ol>
+<blockquote>
+<p>–link　这个参数在官方文档中已经被标记为过期的参数，<a href="https://link.zhihu.com/?target=https%3A//docs.docker.com/network/links/">不再建议使用</a></p>
+</blockquote>
+<p>如上面的两个容器，如果不指定—network，而是用默认的docker0，那么</p>
+<p>在nginx里面 <strong>ping mongo</strong>是不行的，而如果挂到cluster-net-bridge这个桥，<strong>ping mongo</strong> 是可以的</p>
+<p>也就是我可以在nginx这个容器里面直接通过 “mongo” 这个名称来连接mongo服务，而不需要通过子网的ip来连.那么这种默认的约定在运维的时候会非常方便，再结合使用swam和docker-compose.yaml一起来启动，维护会更方便。</p>
+<h2 id="创建docker-bridge-network"><a href="#创建docker-bridge-network" class="headerlink" title="创建docker bridge network"></a>创建docker bridge network</h2><p>接下来我们试一下创建两个docker bridge network, 然后创建新的容器来加入到这两个network.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker network create -d bridge --subnet 192.168.5.0&#x2F;24 --gateway 192.168.5.1 test_bridge1</span><br><span class="line">docker network create -d bridge --subnet 192.168.6.0&#x2F;24 --gateway 192.168.6.1 test_bridge2</span><br></pre></td></tr></table></figure>
+
+<p>用途 *<em>brctl *</em>看看宿主机连的桥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bridge name	bridge id		STP enabled	interfaces</span><br><span class="line">br-6edc31410314		8000.02423e98f193	no		</span><br><span class="line">br-c9608a22917c		8000.0242206cc645	no</span><br></pre></td></tr></table></figure>
+
+<p>用docker network ls 看</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker network ls</span><br><span class="line">brctlNETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">6edc31410314        test_bridge1        bridge              local</span><br><span class="line">c9608a22917c        test_bridge2        bridge              local</span><br></pre></td></tr></table></figure>
+
+<p>network Id对应的就是上面bridge name的id部分</p>
+<p>用docker network inspect 一个看看, 其实br-6edc31410314就是Id前面部分</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&gt; docker network inspect test_bridge1</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;test_bridge1&quot;,</span><br><span class="line">        &quot;Id&quot;: &quot;6edc31410314709178acb728cd448b17f32f2f6a7646299f0c67369329e81a64&quot;,</span><br><span class="line">        &quot;Created&quot;: &quot;2020-03-08T20:33:25.480769489+08:00&quot;,</span><br><span class="line">        &quot;Scope&quot;: &quot;local&quot;,</span><br><span class="line">        &quot;Driver&quot;: &quot;bridge&quot;,</span><br><span class="line">        &quot;EnableIPv6&quot;: false,</span><br><span class="line">        &quot;IPAM&quot;: &#123;</span><br><span class="line">            &quot;Driver&quot;: &quot;default&quot;,</span><br><span class="line">            &quot;Options&quot;: &#123;&#125;,</span><br><span class="line">            &quot;Config&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;Subnet&quot;: &quot;192.168.5.0&#x2F;24&quot;,</span><br><span class="line">                    &quot;Gateway&quot;: &quot;192.168.5.1&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Internal&quot;: false,</span><br><span class="line">        &quot;Attachable&quot;: false,</span><br><span class="line">        &quot;Ingress&quot;: false,</span><br><span class="line">        &quot;ConfigFrom&quot;: &#123;</span><br><span class="line">            &quot;Network&quot;: &quot;&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;ConfigOnly&quot;: false,</span><br><span class="line">        &quot;Containers&quot;: &#123;&#125;,</span><br><span class="line">        &quot;Options&quot;: &#123;&#125;,</span><br><span class="line">        &quot;Labels&quot;: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<h2 id="一个容器如何连到多个桥接网络"><a href="#一个容器如何连到多个桥接网络" class="headerlink" title="一个容器如何连到多个桥接网络"></a>一个容器如何连到多个桥接网络</h2><p>现在我们创建4个新的容器分别加入到这两个network.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># box 1</span><br><span class="line">docker run --name box1 -p 8082:80 -it --rm  --network&#x3D;test_bridge1 busybox sh</span><br><span class="line"># box 2</span><br><span class="line">docker run --name box2 -p 8083:80 -it --rm  --network&#x3D;test_bridge1 busybox sh</span><br><span class="line"># box 3</span><br><span class="line">docker run --name box3 -p 8084:80 -it --rm  --network&#x3D;test_bridge2 busybox sh</span><br><span class="line"># box 4</span><br><span class="line">docker run --name box4 -p 8085:80 -it --rm  --network&#x3D;test_bridge2 busybox sh</span><br></pre></td></tr></table></figure>
+
+<p>container依次从network获取的dhcp获取到ip,依次为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">box 1: 192.168.5.2 </span><br><span class="line">box 2: 192.168.5.3</span><br><span class="line">box 3: 192.168.6.2</span><br><span class="line">box 4: 192.168.6.3</span><br></pre></td></tr></table></figure>
+
+<p>那么box 1和box 2是相互通的，box 3和box 4互通</p>
+<p>在box 1 ping box 2的ip,可以通信</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x2F; # ping 192.168.5.3</span><br><span class="line">PING 192.168.5.3 (192.168.5.3): 56 data bytes</span><br><span class="line">64 bytes from 192.168.5.3: seq&#x3D;0 ttl&#x3D;64 time&#x3D;0.211 ms</span><br></pre></td></tr></table></figure>
+
+<p>在box 1 ping 的容器的名称 box2，也可以通信</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F; # ping box2</span><br><span class="line">PING box2 (192.168.5.3): 56 data bytes</span><br><span class="line">64 bytes from 192.168.5.3: seq&#x3D;0 ttl&#x3D;64 time&#x3D;0.177 ms</span><br><span class="line">64 bytes from 192.168.5.3: seq&#x3D;1 ttl&#x3D;64 time&#x3D;0.172 ms</span><br></pre></td></tr></table></figure>
+
+<p>在box1 ping box3的ip,　不可以通信</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x2F; # ping 192.168.6.2</span><br><span class="line">PING 192.168.6.2 (192.168.6.2): 56 data bytes</span><br></pre></td></tr></table></figure>
+
+<p><strong>如果box1 要和box3要通信怎么办？把box 3加入到box 1的bridge</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network connect test_bridge1 box3</span><br></pre></td></tr></table></figure>
+
+<p>再来看看box 3的网卡, box 3多了一个网卡，ip是192.168.5.4</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&#x2F; # ifconfig</span><br><span class="line">eth0      Link encap:Ethernet  HWaddr 02:42:C0:A8:06:02  </span><br><span class="line">          inet addr:192.168.6.2  Bcast:192.168.6.255  Mask:255.255.255.0</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:172 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0 </span><br><span class="line">          RX bytes:28211 (27.5 KiB)  TX bytes:0 (0.0 B)</span><br><span class="line"></span><br><span class="line">eth1      Link encap:Ethernet  HWaddr 02:42:C0:A8:05:04  </span><br><span class="line">          inet addr:192.168.5.4  Bcast:192.168.5.255  Mask:255.255.255.0</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:43 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0 </span><br><span class="line">          RX bytes:6368 (6.2 KiB)  TX bytes:0 (0.0 B)</span><br><span class="line"></span><br><span class="line">lo        Link encap:Local Loopback  </span><br><span class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000 </span><br><span class="line">          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)</span><br></pre></td></tr></table></figure>
+
+<p>box3和box1通过test_bridge1也桥接起来了,可以通过brctl看看</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜  bin brctl show</span><br><span class="line">bridge name	                bridge id		                STP enabled　interfaces</span><br><span class="line">br-6edc31410314		8000.02423e98f193	no	                       veth4003153</span><br><span class="line"> 　　　　　　　　　　　　　　　　　　　　　　　　　  veth8e06926</span><br><span class="line">							                                                                        　　　vethc2edaec</span><br><span class="line">br-c9608a22917c		8000.0242206cc645	no                         veth5ff4051</span><br><span class="line">							                                                                        　　　veth62200c6</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，bridge1桥接了3个网卡，bridge2桥接了2个网卡</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F; # ping box3</span><br><span class="line">PING box3 (192.168.5.4): 56 data bytes</span><br><span class="line">64 bytes from 192.168.5.4: seq&#x3D;0 ttl&#x3D;64 time&#x3D;0.210 ms</span><br><span class="line">64 bytes from 192.168.5.4: seq&#x3D;1 ttl&#x3D;64 time&#x3D;0.206 ms</span><br><span class="line">64 bytes from 192.168.5.4: seq&#x3D;2 ttl&#x3D;64 time&#x3D;0.138 ms</span><br></pre></td></tr></table></figure>
+
+<p>这样 box1就可以ping 通 box3了</p>
+<p>了解了以上这些原理之后，那么我们可以设计一个这样的网络，把前前后台的容器网络隔离开来，保证安全性<br><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLWRmOTQ1YjdkMzk0MDdlNTEuanBn?x-oss-process=image/format,png" alt="0_f39Sdh-13He13vn7.jpg"></p>
+<p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+
+        </div></article>
+      <article class="post">
+    <header class="post-header">
       <h1 class="post-title"><a class="post-link" href="/2020/06/08/choose-ecs-server-with-requirements/">按资源需求来选择合适的云服务器</a>
         </h1>
 
@@ -400,6 +597,268 @@
         </div></article>
       <article class="post">
     <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/04/22/use-privoxy-for-pac/">构建科学环境之-用privoxy来pac</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-04-22
+        </span><span class="post-category">
+            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/04/22/use-privoxy-for-pac/"
+             data-title="构建科学环境之-用privoxy来pac">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><blockquote>
+<p>Privoxy是一个 HTTP 协议过滤代理。Privoxy 是有着先进的过滤能力和保护隐私的代理工具，它可以过滤网页内容，管理cookies，控制访问，除广告、横幅、弹出窗口等等，它同时支持单系统和多用户网络。<br>如你看到这个简介一样，有意思的是它既能屏蔽广告页可以弹出广告，所以，任何事物都有两面性。</p>
+</blockquote>
+<p>除了上述功能外， privoxy很多时候结合其他的隧道工具使用，达到一些保护隐私的作用，本文简单介绍PAC。</p>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>ubuntu下可直接用apt安装（mac下面可用brew安装）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install privoxy # 安装</span><br></pre></td></tr></table></figure>
+<h1 id="管理"><a href="#管理" class="headerlink" title="管理"></a>管理</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl status privoxy # 查看运行状态</span><br><span class="line">sudo systemctl restart|stop|start privoxy # 重启停止</span><br></pre></td></tr></table></figure>
+<p>配置文件<br>privoxy 在ubuntu下的配置文件在/etc/privoxy下面，下面它的配置有哪些内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">&gt; tree &#x2F;etc&#x2F;privoxy</span><br><span class="line">&#x2F;etc&#x2F;privoxy</span><br><span class="line">├── config</span><br><span class="line">├── default.action</span><br><span class="line">├── default.filter</span><br><span class="line">├── match-all.action</span><br><span class="line">├── regression-tests.action</span><br><span class="line">├── templates</span><br><span class="line">│   ├── blocked</span><br><span class="line">│   ├── cgi-error-404</span><br><span class="line">│   ├── cgi-error-bad-param</span><br><span class="line">│   ├── cgi-error-disabled</span><br><span class="line">│   ├── cgi-error-file</span><br><span class="line">│   ├── cgi-error-file-read-only</span><br><span class="line">│   ├── cgi-error-modified</span><br><span class="line">│   ├── cgi-error-parse</span><br><span class="line">│   ├── cgi-style.css</span><br><span class="line">│   ├── client-tags</span><br><span class="line">│   ├── connect-failed</span><br><span class="line">│   ├── connection-timeout</span><br><span class="line">│   ├── default</span><br><span class="line">│   ├── edit-actions-add-url-form</span><br><span class="line">│   ├── edit-actions-for-url</span><br><span class="line">│   ├── edit-actions-for-url-filter</span><br><span class="line">│   ├── edit-actions-list</span><br><span class="line">│   ├── edit-actions-list-button</span><br><span class="line">│   ├── edit-actions-list-section</span><br><span class="line">│   ├── edit-actions-list-url</span><br><span class="line">│   ├── edit-actions-remove-url-form</span><br><span class="line">│   ├── edit-actions-url-form</span><br><span class="line">│   ├── forwarding-failed</span><br><span class="line">│   ├── mod-local-help</span><br><span class="line">│   ├── mod-support-and-service</span><br><span class="line">│   ├── mod-title</span><br><span class="line">│   ├── mod-unstable-warning</span><br><span class="line">│   ├── no-server-data</span><br><span class="line">│   ├── no-such-domain</span><br><span class="line">│   ├── show-request</span><br><span class="line">│   ├── show-status</span><br><span class="line">│   ├── show-status-file</span><br><span class="line">│   ├── show-url-info</span><br><span class="line">│   ├── show-version</span><br><span class="line">│   ├── toggle</span><br><span class="line">│   ├── toggle-mini</span><br><span class="line">│   ├── untrusted</span><br><span class="line">│   └── url-info-osd.xml</span><br><span class="line">├── trust</span><br><span class="line">├── user.action</span><br><span class="line">└── user.filter</span><br></pre></td></tr></table></figure>
+<p>上面这些配置就不详细介绍了，可以看官方文档<br>privoxy的所有功能由一系列的Action组成(链接里有所有支持的Action)<br>然后，所有的Action的是否启动的配置的入口在config这个文件里面，通过actionsfile这个指令来导入这些action</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">actionsfile match-all.action # Actions that are applied to all sites and maybe overruled later on.</span><br><span class="line">actionsfile default.action   # Main actions file</span><br><span class="line">actionsfile user.action      # User customizations</span><br></pre></td></tr></table></figure>
+<ul>
+<li>match-all.action privoxy默认所有的action都是没有启动的，那么这个文件就是明确设* 置所有的action全部启动</li>
+<li>default.action 开发者定制的一些内置规则</li>
+<li>user.action 一般，上面那两个action的配置文件是不建议被修改的，除非你是开发者或者非常熟悉privoxy，否则其他的扩展需求就在user.action里面做配置就行<br>如果你仅仅需要把privoxy+隧道来无障碍上网的话，那么其实可以把上面所有所有的action都注释都可以，比如我并不讨厌templae广告，犯不着再去定制哪些广告过滤策略，而且privoxy还要花额外的时间来处理这些filter和action， 那你就直接把所有的请求扔给隧道就就好了<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># actionsfile match-all.action # Actions that are applied to all sites and maybe overruled later on.</span><br><span class="line"># actionsfile default.action   # Main actions file</span><br><span class="line"># actionsfile user.action      # User customizations</span><br><span class="line">forward-socks5t   &#x2F;               127.0.0.1:1080 .</span><br></pre></td></tr></table></figure>
+这种情况，一般可以结合浏览器的插件来使用，可以在插件使用gfwlst.txt来做智能路由。<br>当然，如果你不想在浏览器里面用插件，或者你没有条件用那种条件在客户端使用gfwlst.txt(是的，就是你想的那个)，比如你希望你的手机也可以聪明的根据网站来路由，那可以给privoxy定制一个gfwlst.txt的PAC<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gfwlist2privoxy -i gfwlst.txt -f gfwlst.action -p 127.0.0.1:1080 -t socks5</span><br></pre></td></tr></table></figure>
+然后在config里面注册这些个action就好了<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># actionsfile match-all.action # Actions that are applied to all sites and maybe overruled later on.</span><br><span class="line"># actionsfile default.action   # Main actions file</span><br><span class="line"># actionsfile user.action      # User customizations</span><br><span class="line"># forward-socks5t   &#x2F;               127.0.0.1:1080 .</span><br><span class="line">actionsfile gfwlst.action</span><br></pre></td></tr></table></figure>
+配置网后重启一下就好了（重启命令见上面），之后把手机设置到这个privoxy的代理地址就好。</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>最后，如果大家有这个条件可以自由上网，大家还是不要用于来干违法或者打擦边球事，家长下决心要追查的话，是不可能逃掉的。用来学习的话，家长还是有一定的分寸的。<br>还有一点，privoxy+nat很容易实现定点攻击，可以把客户端所有的上网日志记录下来，用来做广告弹出和一些不合法的事情，如盗取客户端的隐私信息（如账号密码之类），所以想提醒大家出门在外，尽量不要连那种公共的wifi。</p>
+<p>回到开篇所说，privoxy它既能屏蔽广告页可以弹出广告，任何事物都有两面性，技术也不例外，一念天堂，一念地狱，劝君自护念之。</p>
+<p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/04/21/diff-bt-hubs-switch-bridge/">集线器 (hubs)，交换机(switch) 和网桥(bridge)的区别</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-04-21
+        </span><span class="post-category">
+            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/04/21/diff-bt-hubs-switch-bridge/"
+             data-title="集线器 (hubs)，交换机(switch) 和网桥(bridge)的区别">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTgwNzQ5ODM0OWQzY2U0NTAuanBn?x-oss-process=image/format,png" alt="image"></p>
+<h2 id="集线器-hub"><a href="#集线器-hub" class="headerlink" title="集线器(hub)"></a>集线器(hub)</h2><ul>
+<li>hub工作在OSI的第一层,发给 hub 的数据包会广播给所有的端口</li>
+<li>hub的是直接的物理连接到每一台设备的网卡，所有有较低的连接丢失风险，因为hub是所有设备共享带宽的一个设备，所以它是半-双工的，所以他会<strong>存在冲突</strong>，同时发给hub的入站和出站包会存在冲突，需要算法解决冲突，因此hub的性能相对会差一些</li>
+<li>hub本质上是一个多端口中继器，它不管包的内容，只是简单的把某个端口收到的包，再广播给其他所有的端口，所以，一台主机发给另外一台主机的内容会被其他无关的主机监听到。<strong>有安全问题</strong></li>
+</ul>
+<h2 id="网桥-bridge"><a href="#网桥-bridge" class="headerlink" title="网桥(bridge)"></a>网桥(bridge)</h2><p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTMyYTYzODUzNDkyMTZlNWIuanBn?x-oss-process=image/format,png" alt="image"></p>
+<ul>
+<li>物理世界桥是用来连接一个河的两边，而计算机世界桥是用来连接两个物理网段的网络</li>
+<li>bridge和switch都工作在OSI的数据第二层（数据链路层），数据包会根据MAC地址来发给指定的端口，不存在hub的那种不管三七二一就广播带来的安全问题</li>
+<li>桥会跟踪插到他的接口上的网络的所有主机的地址，当桥的一端的这个网络的数据包发到桥，桥会过滤机制，保证属于这一端的网络的数据包留在本地，而不会被无辜的转发到对面网络（因为本地包，不是发给桥对面的）</li>
+<li>当桥接受到网络发出来的包的地址不属于桥的这一端，那么他会发到对面去。但是，实际上它并不知道对面是否存在这个地址，只是猜测既然不在这边，那么可能在对面，然后如果对面网络还有其他桥，那么它会发现这个包不在自己这里，又会把包发到其他桥的对面去，<strong>所以一个包要到达目的地址所在的主机，需要经过多个桥</strong></li>
+<li>因为上面这一点，广播和多播（比如arp这种找所有人要地址的包）的这类流量必须经过网络上的所有桥，那么所有的主机都是有机会读到这个广播包的，而网络那么大（特别是桥越多的网络），其实很多包是和自己无关的，那么就会有可能引起<strong>广播风暴</strong>，从而阻止了单播的流量（就是目的明确的包）</li>
+</ul>
+<h2 id="交换机-switch"><a href="#交换机-switch" class="headerlink" title="交换机(switch)"></a>交换机(switch)</h2><ul>
+<li>其实switch本身就是一种bridge,它具备老式bridge的功能，但是解决了一些它的问题</li>
+<li>switch克服了hub的缺点，他可以为每个接入的主机设备分配专用的带宽，提供全-双工的的连接，他利用MAC地址表来做数据包的转发决策，用ASICS和内容寻址寄存器（CAM）表来提高帧的处理率</li>
+<li>switch集hub和bridge的所长于一身，将hub的多端口功能和桥的过滤功能集中在一起使用，<strong>只允许目标设备才能见到单播的数据包</strong>，所以不会像桥一样可能会阻止单播包</li>
+<li>交换机允许冗余链接，并且由于为网桥开发的<a href="https://link.zhihu.com/?target=https%3A//zh.wikipedia.org/wiki/%25E7%2594%259F%25E6%2588%2590%25E6%25A0%2591">生成树</a>协议（STP），广播和多播运行不会引起风暴</li>
+<li>交换机跟踪每个接口中的MAC地址，因此它们可以将流量仅快速发送到包的目的地</li>
+<li>因为上面的这些特点，switch具备更高的性能和安全性</li>
+<li>switch总的来讲，有一下优点：<blockquote>
+<ul>
+<li>switch是即插即用设备。一旦第一个数据包到达，他们便开始学习接口或端口以到达所需的地址,然后用做后续的过滤用。</li>
+<li>switch提供了一种简单的方法来连接以不同速度运行的网段，例如10 Mbps，100 Mbps，1GB和10GB网络</li>
+<li>交换机正在取代网络内部的路由器，因为它们在以太网网络上转发帧的速度快10倍以上</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<p><strong>bridge和switch的其他区别</strong></p>
+<ul>
+<li>古老bridge只有2到4个端口，而switch其实是一种<a href="https://link.zhihu.com/?target=https%3A//www.net.t-labs.tu-berlin.de/teaching/computer_networking/05.06.htm">高性能的多端口的bridge</a>,可以多达几百个端口，本质上switch也是一个bridge设备，它用具备bridge的功能</li>
+<li>古老的bridge是的包转发是基于软件的，而后来研发的switch则是基于硬件来研发，用芯片来做包的转发决策，性能远比老的bridge优越</li>
+<li>新的switch可以具有多个<a href="https://link.zhihu.com/?target=https%3A//zh.wikipedia.org/wiki/%25E7%2594%259F%25E6%2588%2590%25E6%25A0%2591">生成树</a>实例。而老式bridge只能有一个。</li>
+</ul>
+<p>那么为什么switch没有继续使用bridge这个名字呢，因为早期的生产商生产的bridge不符合IEEE的规范（规范从来没有定时bridge只有2个端口），后来者未免与他相提并论，后来干脆不用bridge这个词，直接改用switch,但本质是更好的对规范的实现。</p>
+<p>那么以上的这3个物理设备的概念，对应的也存在虚拟的软件实现，如虚拟的bridge网桥，虚拟的交换机，如docker和k8s这种分布式的软件，经常会使用bridge来建立子网以及和宿主机通信等功能</p>
+<p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/04/19/dqlite-a-ha-database-based-on-sqlite/">Dqlite,基于sqlite 高可用(HA)数据库</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-04-19
+        </span><span class="post-category">
+            <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/04/19/dqlite-a-ha-database-based-on-sqlite/"
+             data-title="Dqlite,基于sqlite 高可用(HA)数据库">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><p>k3s之前的multi-master的支持 Mysql, PostgreSql, etcd 这３个方案，现在正在实验一个内嵌的multi-master方案，使用一个sqlite的HA版本-<a href="https://dqlite.io/" target="_blank" rel="noopener">dqlite</a>，<a href="https://dqlite.io/" target="_blank" rel="noopener">dqlite</a>-顾名思义，distibution sqlite,以后稳定的话，可能会成为官方推荐的HA方案。</p>
+<p>Dqlite用主要做了几个事情:</p>
+<ol>
+<li><p>提供一个基于raft的解决方案，基于一个叫 <a href="https://github.com/canonical/raft" target="_blank" rel="noopener">c-raft</a> 的 raft轻量级实现,</p>
+</li>
+<li><p>把sqlite封装起来，给它存储层注册一个定制driver来操作数据</p>
+</li>
+<li><p>CAP理论里，和绝大多分布式数据库一样，dqlite选择了(CP without A),　就是选择了Consistency（一致性）、Partition tolerance（分区容错性），而不保证 Availability（可用性），也即是:</p>
+</li>
+<li><p>保证了数据一致性</p>
+</li>
+<li><p>保持强一致性，用户请求需要在服务器中所有的分区里面完成了一致性才返回</p>
+</li>
+<li><p>但是，不保证每个请求都能得到没有报错的响应</p>
+</li>
+</ol>
+<p>一般，我们用sqlite是这样的：</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTA0MjQ4ZTg0NmZiMjkxYWEucG5n?x-oss-process=image/format,png" alt="image"></p>
+<p>应用程序直接调用一个单节点的sqlite实例</p>
+<p>使用dqlite,则是这样的</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLWQzOTNjYzVhODhmNDdkMWQucG5n?x-oss-process=image/format,png" alt="image"></p>
+<p>应用程序不直接操作sqlite的接口，调用的是dqlite提供的接口，dqlite通过c-raft来保证数据一致性和容错行</p>
+<p>目前官方提供了一个go的binding, 可以直接在go里使用dqlite的接口</p>
+<p>作者有一个demo的演讲，演示了一个go写的分布式氧饱和度检测仪的例子</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTljNzRlNDVjNjdlZjhkY2QucG5n?x-oss-process=image/format,png" alt="image"></p>
+<p>这段代码很简单，模拟插入氧饱和度的数据，然后提供一个http接口查询平均饱和度返回给调用者</p>
+<p>其中getDatabase方法，如果用单实例的sqlite，它是这样的:</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTkxY2VjZGRmZGQ5YTczNWIucG5n?x-oss-process=image/format,png" alt="image"></p>
+<p>如果用dqlite变成这样</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTYyNTc0NjFmMWVkMWUzOTMucG5n?x-oss-process=image/format,png" alt="image"></p>
+<p>startEngine实际上是调用dqlite的接口创建一个新的dqlite节点</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLWFiZDY2OTFmOTdmYjE1NTgucG5n?x-oss-process=image/format,png" alt="image"></p>
+<p>然后调用dqlite client这个接口连到集群</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLWNiZTlhNTkwY2Y1ZWEyOWMucG5n?x-oss-process=image/format,png" alt="image"></p>
+<p>往sqlite的存储层注入一个dqlite定制的driver</p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yNTkwMDcyLTE1MWUxNDI2ZDIwM2ZiMjQucG5n?x-oss-process=image/format,png" alt="image"></p>
+<p>可以看到，用go来使用这HA方案，还是挺方便易用。</p>
+<p>目前k3s的dqlite HA版本目前还是实验状态，不要在生产环境使用，还有一些问题，比如:</p>
+<ul>
+<li><p>cpu使用率高</p>
+</li>
+<li><p>第一个启动的节点如果崩溃了，leader选举不出来</p>
+</li>
+</ul>
+<p>总的来讲，这个k3s的嵌入式HA方案还是非常值得期待，毕竟在IOT这种蝇级设备里面包mysql或者etcd这种程序还是有点太重了<br><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+<p>参考：</p>
+<ol>
+<li><p><a href="https://fosdem.org/2020/schedule/event/dqlite/" target="_blank" rel="noopener">作者的演讲</a></p>
+</li>
+<li><p><a href="https://github.com/canonical/go-dqlite#demo" target="_blank" rel="noopener">go的binding和demo</a></p>
+</li>
+</ol>
+
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/04/19/use-nc/">瑞士军刀NC</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-04-19
+        </span><span class="post-category">
+            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/04/19/use-nc/"
+             data-title="瑞士军刀NC">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><p>nc是网络调试的一款强大的工具，是用于处理TCP或UDP数据的通用实用程序,是黑客界的瑞士军刀</p>
+<p>看看的常规用法:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&gt; tldr nc</span><br><span class="line">Netcat is a versatile utility for working with TCP or UDP data.</span><br><span class="line">More information: </span><br><span class="line">https:&#x2F;&#x2F;nmap.org&#x2F;ncat</span><br><span class="line"></span><br><span class="line"> - Listen on a specified port and print any data received:</span><br><span class="line">   nc -l &#123;&#123;port&#125;&#125;</span><br><span class="line"></span><br><span class="line"> - Connect to a certain port (you can then write to this port):</span><br><span class="line">   nc &#123;&#123;ip_address&#125;&#125; &#123;&#123;port&#125;&#125;</span><br><span class="line"></span><br><span class="line"> - Set a timeout:</span><br><span class="line">   nc -w &#123;&#123;timeout_in_seconds&#125;&#125; &#123;&#123;ipaddress&#125;&#125; &#123;&#123;port&#125;&#125;</span><br><span class="line"></span><br><span class="line"> - Serve a file:</span><br><span class="line">   nc -l &#123;&#123;port&#125;&#125; &lt; &#123;&#123;file&#125;&#125;</span><br><span class="line"></span><br><span class="line"> - Receive a file:</span><br><span class="line">   nc &#123;&#123;ip_address&#125;&#125; &#123;&#123;port&#125;&#125; &gt; &#123;&#123;file&#125;&#125;</span><br><span class="line"></span><br><span class="line"> - Server stay up after client detach:</span><br><span class="line">   nc -k -l &#123;&#123;port&#125;&#125;</span><br><span class="line"></span><br><span class="line"> - Client stay up after EOF:</span><br><span class="line">   nc -q &#123;&#123;timeout&#125;&#125; &#123;&#123;ip_address&#125;&#125;</span><br><span class="line"></span><br><span class="line"> - Scan the open ports of a specified host:</span><br><span class="line">   nc -v -z &#123;&#123;ip_address&#125;&#125; &#123;&#123;port&#125;&#125;</span><br><span class="line"></span><br><span class="line"> - Act as proxy and forward data from a local TCP port to the given remote host:</span><br><span class="line">   nc -l &#123;&#123;local_port&#125;&#125; | nc &#123;&#123;hostname&#125;&#125; &#123;&#123;remote_port&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>nc对于网络的操作可以分为<strong>接受</strong>和<strong>发送</strong>这两种操作</p>
+<p>区别是参数 <strong>-l</strong>, -l 是监听端口的参数，有这个参数，说明启动的是一个<strong>服务端</strong></p>
+<p>其他没有-l的操作，则是向其他网络端发起网络操作,是一个<strong>客户端</strong></p>
+<h2 id="两个终端实时通讯"><a href="#两个终端实时通讯" class="headerlink" title="两个终端实时通讯"></a>两个终端实时通讯</h2><p>如：</p>
+<p>开一个服务端</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -l 1234 # 打开本地的1234端口，可以通过这个接口接受数据</span><br></pre></td></tr></table></figure>
+
+<p>开一个客户端，向上面这个服务端传数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc localhost 1234</span><br></pre></td></tr></table></figure>
+
+<p>然后，你在客户端里面输入的任何内容都会在跑服务端这段print出来。</p>
+<h2 id="服务端保存接受到的数据成文件"><a href="#服务端保存接受到的数据成文件" class="headerlink" title="服务端保存接受到的数据成文件"></a>服务端保存接受到的数据成文件</h2><p>之前的服务端print的内容是标准输出到终端窗口，我们也可以改一下输出到一个文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">touch log.txt | nc -l 1234 &gt; server.txt　#  所有的接受到的数据会保存到server.txt</span><br></pre></td></tr></table></figure>
+
+<p>我们刚才上面是用 nc localhost 1234来向服务端发数据，其实也可以直接用telnet</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">telnet localhost 1234 # 所有telnet命令下的敲入的数据都会被传到服务器，直到telnet客户端断开连接</span><br></pre></td></tr></table></figure>
+
+<h2 id="传输文件"><a href="#传输文件" class="headerlink" title="传输文件"></a>传输文件</h2><p>也可以直接向服务端传输文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &#39;this is client&#39; &gt; client.txt</span><br><span class="line">nc localhost 1234 &lt; client.txt # client.txt的重定向到nc，然后传给服务端,server.txt的内容就变成client.txt的内容</span><br></pre></td></tr></table></figure>
+
+<p>那么如果要从服务端下载内容怎么做？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">echo &#39;this is server&#39; &gt; server.txt</span><br><span class="line">nc -l 1234 &lt; server.txt # 把server.txt重定向给nc,作为服务内容</span><br><span class="line">nc localhost 1234 # server.txt的内容会在客户端打印出来</span><br><span class="line">nc -n localhost 1234 &gt; client.txt # server的内容会保持到client.txt</span><br></pre></td></tr></table></figure>
+
+<p>如果我们平时想临时搭建一个服务在两台机器间传输文件，用nc是非常方便的，那么这种传输的其他用途，大家可以发挥自己的想象力</p>
+<h2 id="传输整个目录"><a href="#传输整个目录" class="headerlink" title="传输整个目录"></a>传输整个目录</h2><p>传输目录要借助压缩工具，比如tar,把目录压缩成一个文件然后通过管道流到nc</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tar -cvf - . | nc -l 1234 # 压缩当前目录传输出去</span><br><span class="line">nc localhost 1234 &gt; server.tar # 接受到的目录压缩包保存位server.tar</span><br><span class="line">nc localhost 1234 | tar -xvf - # 直接解压压缩到的目录到当前目录</span><br></pre></td></tr></table></figure>
+
+<h2 id="加密传输"><a href="#加密传输" class="headerlink" title="加密传输"></a>加密传输</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mcrypt –flush –bare -F -q -m ecb &lt; server.txt | nc -l 1234</span><br><span class="line">nc localhost 1234 | mcrypt –flush –bare -F -q -d -m ecb &gt; server.txt</span><br></pre></td></tr></table></figure>
+
+<p>通过mcrypt加密后重定向给nc,客户端收到后，同样的解密，两端需要数同样的加密密码</p>
+<h2 id="反向代理"><a href="#反向代理" class="headerlink" title="反向代理"></a>反向代理</h2><p>上面我们知道，可以通过命令单方面向服务端发起数据，反向代理需要我们服务端自动响应，所以我们借助命令管道来实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkfifo reply # 创建命名管道 replay</span><br><span class="line"># reply重定向给nc server,</span><br><span class="line"># nc server又通过管道把接收到的内容交给另外一个nc客户端</span><br><span class="line"># 然后这个客户端接收到内容重定向给命名管道replay, </span><br><span class="line"># 由于reply已经重定向给server,所以就能接收到client请求的结果</span><br><span class="line">nc -k -l 1234 &lt; reply | nc localhost 8080 &gt; reply</span><br></pre></td></tr></table></figure>
+
+<p>打开浏览器输入<a href="http://localhost:1234，就能看到localhost:8080的内容">http://localhost:1234，就能看到localhost:8080的内容</a></p>
+<p>结束后，记得把执行** rm reply** 把命名管道删除掉</p>
+<h2 id="克隆一个linux系统"><a href="#克隆一个linux系统" class="headerlink" title="克隆一个linux系统"></a>克隆一个linux系统</h2><p>借助dd来读取磁盘的原始数据重定向给server</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dd if&#x3D;&#x2F;dev&#x2F;sda | nc -l 1234 # 已有机器，假设系统装在设备sda上</span><br><span class="line">nc -n &#123;ip from linux device&#125; 1234 | dd of&#x3D;&#x2F;dev&#x2F;sda</span><br></pre></td></tr></table></figure>
+
+<h2 id="远程执行shell-代替ssh"><a href="#远程执行shell-代替ssh" class="headerlink" title="远程执行shell(代替ssh)"></a>远程执行shell(代替ssh)</h2><p>有时候，我们没有安装ssh的时候，也可以用nc来帮我们对服务器做远程的shell操作,原理也是借助命名管道来实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rm -f &#x2F;tmp&#x2F;f; mkfifo &#x2F;tmp&#x2F;f # 先删除可能以前遗留的命名管道f（应该起一个独特的名字）</span><br><span class="line"># 把命名管道的内容导入到给shell, </span><br><span class="line"># shell启动交互模式，执行的结果错误也重新通过管道写到标准输出，标准输出又通过管道交给nc</span><br><span class="line"># 然后nc接收到输入命令又重定向给&#x2F;tmp&#x2F;f命名管道，形成闭环</span><br><span class="line">cat &#x2F;tmp&#x2F;f | &#x2F;bin&#x2F;sh -i 2&gt;&amp;1 | nc -l 127.0.0.1 1234 &gt; &#x2F;tmp&#x2F;f</span><br></pre></td></tr></table></figure>
+
+<p>在客户端输入,就会出现一个可交互的命令终端</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">nc localhost 1234</span><br><span class="line">$ ls</span><br><span class="line">server.txt</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h2 id="扫描端口"><a href="#扫描端口" class="headerlink" title="扫描端口"></a>扫描端口</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">nc -zv localhost 20-80      </span><br><span class="line">nc: connect to localhost port 20 (tcp) failed: Connection refused</span><br><span class="line">nc: connect to localhost port 21 (tcp) failed: Connection refused</span><br><span class="line">Connection to localhost 22 port [tcp&#x2F;ssh] succeeded!</span><br><span class="line">nc: connect to localhost port 23 (tcp) failed: Connection refused</span><br></pre></td></tr></table></figure>
+
+<p>好了</p>
+<p>最后想说，技术无知，人有分别，请大家管好自己的键(欲)盘(望).</p>
+<p><img src="https://img-blog.csdnimg.cn/20200713121155606.jpg#pic_center" alt=""></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+
+        </div></article>
+      <article class="post">
+    <header class="post-header">
       <h1 class="post-title"><a class="post-link" href="/2020/04/08/how-to-playwith-a-private-cloud-server/">个人拥有云服务器能用来干啥好玩的？</a>
         </h1>
 
@@ -468,6 +927,88 @@
           <div class="read-more">
             <a href="/2020/03/27/understanding-k8s-flannel-networking/" class="read-more-link">阅读更多</a>
           </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/03/27/what-is-net-mask/">什么是子网掩码？</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-03-27
+        </span><span class="post-category">
+            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/03/27/what-is-net-mask/"
+             data-title="什么是子网掩码？">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><p>“子网”掩码，顾名思义，它就是拿来划分子网的，更准确的说，划分子网的同时，还能通过它知道主机在子网里面的具体ip的具体地址。</p>
+<h2 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h2><p>那么划分这个子网有什么用呢？</p>
+<ol>
+<li>方便管理，不同的子网可以相互隔离</li>
+<li>我们知道，IPv4的ip地址资源比较紧张，实际上整个互联网就是一个巨大的局域网，ip地址有限，那么通过划分子网，如何再在子网里面分配ip地址给子网的主机，这个时候同一一个ip就可以给一整个子网所共用，就解决了互联网ip不够的问题</li>
+</ol>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>既然要划分子网，要有一个规则，告诉路由器，IP的哪一部分是表示子网，哪一部分表示我在这个子网里面具体的地址</p>
+<p>所以，实际上IP细来讲又分为三部分：网络部分（network）子网段部分(subnetwork)和主机部分(host)</p>
+<p>一般大家喜欢把网络部分和子网部分合并成为网络地址(网络号)，把子网看做是网络的一部分，主机部分称为主机地址（主机号）</p>
+<p>通俗理解：</p>
+<ul>
+<li>网络号（subnetwork），表示我住哪个小区</li>
+<li>主机号(host)，表示我家门牌号是多少</li>
+</ul>
+<p>或者说网络号就是我们平时打电话的区号，主机号是你的电话号码，如010-80220110, 010是网络号，80220110是主机号</p>
+<p>我们平常看到的192.168.0.x这样的IP，这是给我们看的地址，计算机内部计算把ip变成二进制，每一个IP被4个点分成4部分，每一部分有8位，也就是一个IP实际上是一个一共32位的二进制数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">如 192.168.0.3 换成二进制是 11000000 10101000 00000000 00000011</span><br></pre></td></tr></table></figure>
+
+<p>然后，这个32位的数根据需要被分为五大类分，由IANA(<a href="https://zh.wikipedia.org/wiki/%E4%BA%92%E8%81%94%E7%BD%91%E5%9C%B0%E5%9D%80%E6%8C%87%E6%B4%BE%E6%9C%BA%E6%9E%84" target="_blank" rel="noopener">全球互联网地址指派机构</a>)配给大家使用</p>
+<p><img src="https://img-blog.csdnimg.cn/20200327201554415.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="IP地址的分类：+共分五类，A类、B类、C类、D类和E类，人们常用的IP地址属于前三类.jpg"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">一般来说这五类的用途大致分为：</span><br><span class="line">A类保留给政府机构（0.0.0.0到127.255.255.255）</span><br><span class="line">B类分配给中等规模的公司（128.0.0.0到191.255.255.255）</span><br><span class="line">C类分配给任何需要的人（192.0.0.0到223.255.255.255）</span><br><span class="line">D类用于组播（224.0.0.0---239.255.255.255）</span><br><span class="line">E类用于实验（240.0.0.0---247.255.255.255）</span><br><span class="line">A、B、C三类中IP地址&#x3D;网络地址+主机地址，而D、E两类不区分网络地址和主机地址</span><br><span class="line">特殊说明：</span><br><span class="line">（1）A类中的 10.X.X.X是私有地址；127.X.X.X是保留地址</span><br><span class="line">（2）B类中的 172.16.0.0~172.31.255.255是私有地址</span><br><span class="line">（3）C类中的 192.168.X.X是私有地址</span><br></pre></td></tr></table></figure>
+
+<p>那么，是怎么样计算出来网络号和主机号的呢？</p>
+<p>子网掩码会把一个IP地址按这个划分成这两部分，计算方法是通过把IP地址变成二进制，子网掩码也转成二进制后，两个二进制数按位做 <strong>与运算。</strong></p>
+<p>比如，一个C类地址，ip: 192.168.0.3 ，子网掩码是：255.255.255.0</p>
+<ol>
+<li>第一步先转而进制</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip:   192.168.0.3   &gt;  11000000 10101000 00000000 00000011</span><br><span class="line">网掩码：255.255.255.0 &gt;  11111111 11111111 00000000 00000000</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>然后两个二进制按位做与计算</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">11000000 10101000 00000000 00000011</span><br><span class="line">&amp;</span><br><span class="line">11111111 11111111 00000000 00000000</span><br><span class="line">&#x3D;</span><br><span class="line">11000000 10101000 00000000 00000000</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>把这个而结果 : 11000000 10101000 00000000 00000000 每个8位转化回变成: 192.168.0.0</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.0 这个就是我们的网络段（包括了上面说的网络部分和子网部分）</span><br><span class="line">3 就是我们的主机号（主机在子网络里面的标识）</span><br></pre></td></tr></table></figure>
+
+<h2 id="CIDR-无类别域间路由-VLSM（可变长子网掩码）"><a href="#CIDR-无类别域间路由-VLSM（可变长子网掩码）" class="headerlink" title="CIDR(无类别域间路由)/VLSM（可变长子网掩码）"></a>CIDR(无类别域间路由)/VLSM（可变长子网掩码）</h2><p>上面这个算法看起来有点难理解，另外一种CIDR(无类别域间路由)/VLSM（可变长子网掩码）的表示法跟容易看懂，如下面这个:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.3&#x2F;24</span><br></pre></td></tr></table></figure>
+
+<p>24表示这个ip的32位二进制数的前24位是网络标识的前缀，剩下的8位是主机标识，严格来，剩下的8位里面，全部是0是这个网络的标识，全部是1是这个网络的子网内广播地址，其他是这个子网网络的可用地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.3   &#x3D;&gt;  11000000 10101000 00000000 00000011</span><br><span class="line"></span><br><span class="line">网络标识的前缀： 11000000 10101000 00000000 --（前24位）换算位10进制：192.168.0</span><br><span class="line">网络标识: 11000000 10101000 00000000 00000000 --剩下8位全是0，转10进制是：192.168.0.0</span><br><span class="line">广播地址  11000000 10101000 00000000 11111111 --剩下8位全是1，转10进制是：192.168.0.255</span><br></pre></td></tr></table></figure>
+
+<p>大家看，这个就很容易理解了，除了网络标识和广播地址这两个特殊地址，剩下8位里面其他二进制数就是其他主机的标识。</p>
+<p>实际上，这个192.168.0.3/24 ,前24位全1，就是等于255.255.255.0,这个就是这个网络的子网掩码，而无类别域间路由是基于<strong>可变长子网掩码（VLSM）</strong>来进行任意长度的前缀的分配的，所以这个24也可以变成其他数，如16</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.3&#x2F;16</span><br></pre></td></tr></table></figure>
+
+<p>只有前16位是网络，后面是地址16标识，换算回来就是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.0 是网络标识（后16位二进制全位0）</span><br><span class="line">192.168.255.255这个是域内广播地址（后16位二进制全为1）</span><br></pre></td></tr></table></figure>
+
+<p>那么192.168.0.0 - 192.168.255.255 间所有的其他地址就是这个子网的可以容纳的主机地址</p>
+<p>所以这个子网的地址数量明显比192.168.0.3/24那个要大多了</p>
+<p>那么的子网掩码也很容易计算，就是前面16位全是1后面16位全是0，换算成10进制就是255.255.0.0</p>
+<p>更多的CIDR/VLSM例子：<br><img src="https://img-blog.csdnimg.cn/20200327201653162.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="2020-03-05 22-33-24 的屏幕截图.png"></p>
+<p><img src="https://img-blog.csdnimg.cn/20200713121642481.jpg" alt="欢迎关注公众号和我互动"></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+
         </div></article>
       <nav class="pagination"></nav></section></div></div>
       </main>

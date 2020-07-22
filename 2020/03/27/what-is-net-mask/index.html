@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="什么是子网掩码？"/><meta name="keywords" content="阿里云，腾讯云，华为云，云主机，云服务器，对比，比较，评测" /><link rel="alternate" href="/default" title="Noosphere"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://noosphere.site/2020/03/27/what-is-net-mask/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_analytics">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?438bb344f6f5031be90f213101b87127";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script><!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-170909162-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-170909162-1');
+</script><script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script src="//cdn1.lncld.net/static/js/3.1.1/av-min.js"></script>
+  <script id="leancloud">
+    AV.init({
+      appId: "AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz",
+      appKey: "GTE9k7Cyl9mtVbUHbvdIxXvc"
+    });
+  </script><script>
+  window.config = {"leancloud":{"app_id":"AXqYYGMatVe7QIipcJAITRW4-gzGzoHsz","app_key":"GTE9k7Cyl9mtVbUHbvdIxXvc"},"toc":true,"fancybox":true,"pjax":"","latex":false};
+</script>
+
+    <title>什么是子网掩码？ - Noosphere</title>
+  <meta name="generator" content="Hexo 4.2.1"></head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Noosphere</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a><a href="/archives/">
+        <li class="mobile-menu-item">归档
+          </li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签
+          </li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类
+          </li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Noosphere</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            归档
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/tags/">
+            标签
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/categories/">
+            分类
+            </a>
+        </li>
+      <li class="menu-item">
+          <a class="menu-item-link" href="/about/">
+            关于
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">什么是子网掩码？
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-03-27
+        </span><span class="post-category">
+            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/03/27/what-is-net-mask/"
+             data-title="什么是子网掩码？">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#用途"><span class="toc-text">用途</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#原理"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CIDR-无类别域间路由-VLSM（可变长子网掩码）"><span class="toc-text">CIDR(无类别域间路由)&#x2F;VLSM（可变长子网掩码）</span></a></li></ol>
+    </div>
+  </div><div class="post-content"><p>“子网”掩码，顾名思义，它就是拿来划分子网的，更准确的说，划分子网的同时，还能通过它知道主机在子网里面的具体ip的具体地址。</p>
+<h2 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h2><p>那么划分这个子网有什么用呢？</p>
+<ol>
+<li>方便管理，不同的子网可以相互隔离</li>
+<li>我们知道，IPv4的ip地址资源比较紧张，实际上整个互联网就是一个巨大的局域网，ip地址有限，那么通过划分子网，如何再在子网里面分配ip地址给子网的主机，这个时候同一一个ip就可以给一整个子网所共用，就解决了互联网ip不够的问题</li>
+</ol>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>既然要划分子网，要有一个规则，告诉路由器，IP的哪一部分是表示子网，哪一部分表示我在这个子网里面具体的地址</p>
+<p>所以，实际上IP细来讲又分为三部分：网络部分（network）子网段部分(subnetwork)和主机部分(host)</p>
+<p>一般大家喜欢把网络部分和子网部分合并成为网络地址(网络号)，把子网看做是网络的一部分，主机部分称为主机地址（主机号）</p>
+<p>通俗理解：</p>
+<ul>
+<li>网络号（subnetwork），表示我住哪个小区</li>
+<li>主机号(host)，表示我家门牌号是多少</li>
+</ul>
+<p>或者说网络号就是我们平时打电话的区号，主机号是你的电话号码，如010-80220110, 010是网络号，80220110是主机号</p>
+<p>我们平常看到的192.168.0.x这样的IP，这是给我们看的地址，计算机内部计算把ip变成二进制，每一个IP被4个点分成4部分，每一部分有8位，也就是一个IP实际上是一个一共32位的二进制数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">如 192.168.0.3 换成二进制是 11000000 10101000 00000000 00000011</span><br></pre></td></tr></table></figure>
+
+<p>然后，这个32位的数根据需要被分为五大类分，由IANA(<a href="https://zh.wikipedia.org/wiki/%E4%BA%92%E8%81%94%E7%BD%91%E5%9C%B0%E5%9D%80%E6%8C%87%E6%B4%BE%E6%9C%BA%E6%9E%84" target="_blank" rel="noopener">全球互联网地址指派机构</a>)配给大家使用</p>
+<p><img src="https://img-blog.csdnimg.cn/20200327201554415.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="IP地址的分类：+共分五类，A类、B类、C类、D类和E类，人们常用的IP地址属于前三类.jpg"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">一般来说这五类的用途大致分为：</span><br><span class="line">A类保留给政府机构（0.0.0.0到127.255.255.255）</span><br><span class="line">B类分配给中等规模的公司（128.0.0.0到191.255.255.255）</span><br><span class="line">C类分配给任何需要的人（192.0.0.0到223.255.255.255）</span><br><span class="line">D类用于组播（224.0.0.0---239.255.255.255）</span><br><span class="line">E类用于实验（240.0.0.0---247.255.255.255）</span><br><span class="line">A、B、C三类中IP地址&#x3D;网络地址+主机地址，而D、E两类不区分网络地址和主机地址</span><br><span class="line">特殊说明：</span><br><span class="line">（1）A类中的 10.X.X.X是私有地址；127.X.X.X是保留地址</span><br><span class="line">（2）B类中的 172.16.0.0~172.31.255.255是私有地址</span><br><span class="line">（3）C类中的 192.168.X.X是私有地址</span><br></pre></td></tr></table></figure>
+
+<p>那么，是怎么样计算出来网络号和主机号的呢？</p>
+<p>子网掩码会把一个IP地址按这个划分成这两部分，计算方法是通过把IP地址变成二进制，子网掩码也转成二进制后，两个二进制数按位做 <strong>与运算。</strong></p>
+<p>比如，一个C类地址，ip: 192.168.0.3 ，子网掩码是：255.255.255.0</p>
+<ol>
+<li>第一步先转而进制</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip:   192.168.0.3   &gt;  11000000 10101000 00000000 00000011</span><br><span class="line">网掩码：255.255.255.0 &gt;  11111111 11111111 00000000 00000000</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>然后两个二进制按位做与计算</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">11000000 10101000 00000000 00000011</span><br><span class="line">&amp;</span><br><span class="line">11111111 11111111 00000000 00000000</span><br><span class="line">&#x3D;</span><br><span class="line">11000000 10101000 00000000 00000000</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>把这个而结果 : 11000000 10101000 00000000 00000000 每个8位转化回变成: 192.168.0.0</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.0 这个就是我们的网络段（包括了上面说的网络部分和子网部分）</span><br><span class="line">3 就是我们的主机号（主机在子网络里面的标识）</span><br></pre></td></tr></table></figure>
+
+<h2 id="CIDR-无类别域间路由-VLSM（可变长子网掩码）"><a href="#CIDR-无类别域间路由-VLSM（可变长子网掩码）" class="headerlink" title="CIDR(无类别域间路由)/VLSM（可变长子网掩码）"></a>CIDR(无类别域间路由)/VLSM（可变长子网掩码）</h2><p>上面这个算法看起来有点难理解，另外一种CIDR(无类别域间路由)/VLSM（可变长子网掩码）的表示法跟容易看懂，如下面这个:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.3&#x2F;24</span><br></pre></td></tr></table></figure>
+
+<p>24表示这个ip的32位二进制数的前24位是网络标识的前缀，剩下的8位是主机标识，严格来，剩下的8位里面，全部是0是这个网络的标识，全部是1是这个网络的子网内广播地址，其他是这个子网网络的可用地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.3   &#x3D;&gt;  11000000 10101000 00000000 00000011</span><br><span class="line"></span><br><span class="line">网络标识的前缀： 11000000 10101000 00000000 --（前24位）换算位10进制：192.168.0</span><br><span class="line">网络标识: 11000000 10101000 00000000 00000000 --剩下8位全是0，转10进制是：192.168.0.0</span><br><span class="line">广播地址  11000000 10101000 00000000 11111111 --剩下8位全是1，转10进制是：192.168.0.255</span><br></pre></td></tr></table></figure>
+
+<p>大家看，这个就很容易理解了，除了网络标识和广播地址这两个特殊地址，剩下8位里面其他二进制数就是其他主机的标识。</p>
+<p>实际上，这个192.168.0.3/24 ,前24位全1，就是等于255.255.255.0,这个就是这个网络的子网掩码，而无类别域间路由是基于<strong>可变长子网掩码（VLSM）</strong>来进行任意长度的前缀的分配的，所以这个24也可以变成其他数，如16</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.3&#x2F;16</span><br></pre></td></tr></table></figure>
+
+<p>只有前16位是网络，后面是地址16标识，换算回来就是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.0 是网络标识（后16位二进制全位0）</span><br><span class="line">192.168.255.255这个是域内广播地址（后16位二进制全为1）</span><br></pre></td></tr></table></figure>
+
+<p>那么192.168.0.0 - 192.168.255.255 间所有的其他地址就是这个子网的可以容纳的主机地址</p>
+<p>所以这个子网的地址数量明显比192.168.0.3/24那个要大多了</p>
+<p>那么的子网掩码也很容易计算，就是前面16位全是1后面16位全是0，换算成10进制就是255.255.0.0</p>
+<p>更多的CIDR/VLSM例子：<br><img src="https://img-blog.csdnimg.cn/20200327201653162.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="2020-03-05 22-33-24 的屏幕截图.png"></p>
+<p><img src="https://img-blog.csdnimg.cn/20200713121642481.jpg" alt="欢迎关注公众号和我互动"></p>
+<blockquote>
+<p>欢迎关注我的公众号和我互动</p>
+</blockquote>
+
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://noosphere.site">noosphere</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://noosphere.site/2020/03/27/what-is-net-mask/">https://noosphere.site/2020/03/27/what-is-net-mask/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <div class="post-reward">
+    <input type="checkbox" name="reward" id="reward" hidden />
+    <label class="reward-button" for="reward">赞赏支持</label>
+    <div class="qr-code"><label class="qr-code-image" for="reward">
+          <img class="image" src="/images/reward/wechat.png" title="wechat">
+          <br/>
+          <label>微信</label>
+        </label>
+      <label class="qr-code-image" for="reward">
+          <img class="image" src="/images/reward/alipay.png" title="alipay">
+          <br/>
+          <label>支付宝</label>
+        </label>
+      </div>
+  </div><footer class="post-footer">
+        <div class="post-tags">
+            <a href="/tags/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
+            <a href="/tags/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
+            </div>
+        
+        <nav class="post-nav"><a class="prev" href="/2020/03/27/understanding-k8s-flannel-networking/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">理解k8s的Flannel网络</span>
+        <span class="prev-text nav-mobile">上一篇</span>
+      </a>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"><div id="gitalk-container"></div>
+    </div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="https://github.com/noosphere-coder" target="_blank" rel="noopener" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even" target="_blank" rel="noopener">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2020<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">noosphere</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css"/>
+
+
+<script src="//cdn.jsdelivr.net/npm/js-md5@0.7.3/src/md5.min.js"></script>
+
+<script>
+  var gitalk = new Gitalk({
+    clientID: '6cc970aab706e685584e',
+    clientSecret: '3b5906d70b4f6a6460bc184aa0dd49822717e06e',
+    repo: 'noosphere-coder.github.io',
+    owner: 'noosphere-coder',
+    admin: ['noosphere-coder'],
+    id: md5(location.pathname),
+    
+      language: 'zh-CN',
+    
+    distractionFreeMode: 'true'
+  });
+  gitalk.render('gitalk-container');
+</script><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
+</body>
+</html>
