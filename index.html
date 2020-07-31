@@ -128,6 +128,45 @@
         <div class="content-wrapper">
           <div id="content" class="content"><section id="posts" class="posts"><article class="post">
     <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/07/31/how-to-set-dns-record-correctly-with-hexo-hugo-and-other-staic-blog/">如何正确的给hexo、hugo等静态博客做dns解析？</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-07-31
+        </span><span class="post-category">
+            <a href="/categories/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">开发环境</a>
+            <a href="/categories/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/hexo/">hexo</a>
+            <a href="/categories/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/hexo/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
+            <a href="/categories/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/hexo/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/%E4%BA%91%E4%B8%BB%E6%9C%BA/">云主机</a>
+            </span>
+        <span class="post-visits"
+             data-url="/2020/07/31/how-to-set-dns-record-correctly-with-hexo-hugo-and-other-staic-blog/"
+             data-title="如何正确的给hexo、hugo等静态博客做dns解析？">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>之前我搭建hexo的时候，觉得github.io的速度比较快，所以默认的dns通过cname解析到了github.io，然后搜索引擎解析到coding的pages。这样个人访问飞快，搜索引擎又可以抓取, 多好啊。</p>
+<p>但是，告诉大家，这样个方案是不靠谱的，因为<code>github.io这个域名已经大面积被污染</code></p>
+<p>我怎么知道的？刚好昨天用helm add一个repo，刚好这个repo又是部署*.github.io的静态网站，安装失败后，用curl看这个请求这个地址的细节，发现请求的地址是<code>127.0.0.1</code>。怪不得前两天我的博客突然访问不了，还纳闷qiang怎么会封我一个小小的博客呢，不至于吧。</p>
+<p>于是，赶紧dig一下，发现无论是电信的dns还是google的dns，A记录都被修改成<code>127.0.0.1</code>了<br><img src="https://img-blog.csdnimg.cn/20200731101649432.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="github.io被污染"></p>
+<p>再来看看全国污染过的情况：<br><img src="https://img-blog.csdnimg.cn/20200731101712834.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="用17ce.com看看各地污染的情况"><br>有被改为<code>127.0.0.1</code>的，有改到<code>::1</code>的，按这个抽样，全国已经有1/3的地区被污染过了（还有其他“无法连接到主机”等问题不算进去）</p>
+<p>所以，基本上，如果你搭建pages，设置的<code>dns</code>默认指向<code>github.io</code>的话，是不靠谱的，因为你可能运气好，所在地区没有被污染，你自己是可以访问到的，你以为正常，但是<code>全国可能有1/3的地方访问不了你的博客</code>。</p>
+<h2 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h2><p>怎么办？</p>
+<ol>
+<li>免费的方案的话，把<code>默认</code>的<code>dns</code>解析到<code>coding</code>.（虽然<code>coding</code>的速度非常<code>不稳定，但是保证能用</code>）</li>
+<li><code>境外</code>线路解析到<code>github.io</code></li>
+<li>采用其他收费的托管服务</li>
+</ol>
+<p>收费的方案不说了，搭个博客，我暂时还不想付费。</p>
+<p>那么免费的方案（<code>github</code>和<code>coding</code>）,按这个1和2解析后，<code>国内</code>默认访问<code>coding</code>，而且搜索引擎能抓取到（收不收录是另外一码事），代价是会很不稳地，有时候会慢的飞起，有时候挺快。<code>国外</code>的用户，则能飞快的访问到，因为他们解析到的是<code>github.io</code>，而且google肯定都是收录的。</p>
+<h2 id="话题外"><a href="#话题外" class="headerlink" title="话题外"></a>话题外</h2><p>至于如何解决helm add repo的问题，临时性的话，就在/etc/hosts里面加一条记录就好。觉得不爽的话，就自己本地弄一个dns吧，如coredns，一次性解决这个问题。</p>
+
+        </div></article>
+      <article class="post">
+    <header class="post-header">
       <h1 class="post-title"><a class="post-link" href="/2020/07/14/hexo-action-deploy-to-coding-and-github-gracefully/">优雅的将hexo部署到github和coding</a>
         </h1>
 
