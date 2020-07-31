@@ -156,6 +156,7 @@
   </div><div class="post-content"><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>之前我搭建hexo的时候，觉得github.io的速度比较快，所以默认的dns通过cname解析到了github.io，然后搜索引擎解析到coding的pages。这样个人访问飞快，搜索引擎又可以抓取, 多好啊。</p>
 <p>但是，告诉大家，这样个方案是不靠谱的，因为<code>github.io这个域名已经大面积被污染</code></p>
 <p>我怎么知道的？刚好昨天用helm add一个repo，刚好这个repo又是部署*.github.io的静态网站，安装失败后，用curl看这个请求这个地址的细节，发现请求的地址是<code>127.0.0.1</code>。怪不得前两天我的博客突然访问不了，还纳闷qiang怎么会封我一个小小的博客呢，不至于吧。</p>
+<a id="more"></a>
 <p>于是，赶紧dig一下，发现无论是电信的dns还是google的dns，A记录都被修改成<code>127.0.0.1</code>了<br><img src="https://img-blog.csdnimg.cn/20200731101649432.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="github.io被污染"></p>
 <p>再来看看全国污染过的情况：<br><img src="https://img-blog.csdnimg.cn/20200731101712834.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lvdWxpbg==,size_16,color_FFFFFF,t_70" alt="用17ce.com看看各地污染的情况"><br>有被改为<code>127.0.0.1</code>的，有改到<code>::1</code>的，按这个抽样，全国已经有1/3的地区被污染过了（还有其他“无法连接到主机”等问题不算进去）</p>
 <p>所以，基本上，如果你搭建pages，设置的<code>dns</code>默认指向<code>github.io</code>的话，是不靠谱的，因为你可能运气好，所在地区没有被污染，你自己是可以访问到的，你以为正常，但是<code>全国可能有1/3的地方访问不了你的博客</code>。</p>
