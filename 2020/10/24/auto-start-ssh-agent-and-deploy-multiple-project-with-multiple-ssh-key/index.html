@@ -134,7 +134,17 @@
       <div class="post-meta">
         <span class="post-time">
           2020-10-24
-        </span><span class="post-visits"
+        </span><span class="post-category">
+            <a href="/categories/ssh/">ssh</a>
+            <a href="/categories/ssh/ssh-agent/">ssh-agent</a>
+            <a href="/categories/ssh/ssh-agent/git/">git</a>
+            <a href="/categories/ssh/ssh-agent/git/%E9%98%BF%E9%87%8C%E4%BA%91/">阿里云</a>
+            <a href="/categories/ssh/ssh-agent/git/%E9%98%BF%E9%87%8C%E4%BA%91/%E8%85%BE%E8%AE%AF%E4%BA%91/">腾讯云</a>
+            <a href="/categories/ssh/ssh-agent/git/%E9%98%BF%E9%87%8C%E4%BA%91/%E8%85%BE%E8%AE%AF%E4%BA%91/%E5%8D%8E%E4%B8%BA%E4%BA%91/">华为云</a>
+            <a href="/categories/ssh/ssh-agent/git/%E9%98%BF%E9%87%8C%E4%BA%91/%E8%85%BE%E8%AE%AF%E4%BA%91/%E5%8D%8E%E4%B8%BA%E4%BA%91/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
+            <a href="/categories/ssh/ssh-agent/git/%E9%98%BF%E9%87%8C%E4%BA%91/%E8%85%BE%E8%AE%AF%E4%BA%91/%E5%8D%8E%E4%B8%BA%E4%BA%91/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/%E4%BA%91%E4%B8%BB%E6%9C%BA/">云主机</a>
+            </span>
+        <span class="post-visits"
              data-url="/2020/10/24/auto-start-ssh-agent-and-deploy-multiple-project-with-multiple-ssh-key/"
              data-title="多ssh key部署同一台server以及ssh-agent的最佳实践">
           阅读次数 0
@@ -147,7 +157,8 @@
     <div class="post-toc-content">
       <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#生成新的密钥对"><span class="toc-text">生成新的密钥对</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-创建-ssh-config"><span class="toc-text">1. 创建~&#x2F;.ssh&#x2F;config</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-修改git-remote"><span class="toc-text">2. 修改git remote</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ssh-agent自动启动"><span class="toc-text">ssh-agent自动启动</span></a></li></ol>
     </div>
-  </div><div class="post-content"><p>有些时候，我们需要在一台服务器里拉取github的项目，由于安全考虑，github的规定一个<code>deploy key</code>只能用在一个项目里面。 所以多个项目就需要我们用多个<code>ssh key</code></p>
+  </div><div class="post-content"><hr>
+<p>有些时候，我们需要在一台服务器里拉取github的项目，由于安全考虑，github的规定一个<code>deploy key</code>只能用在一个项目里面。 所以多个项目就需要我们用多个<code>ssh key</code></p>
 <p>而我们如果只在一台服务器，除了默认生成的<code>id_rsa</code>,则需要为每个项目加入生成一个独立的<code>ssh key</code>，这样就存在多个秘钥和公钥对，那么我们执行<code>git pull</code>或者<code>git push</code>这样的命令的时候，ssh如何找到正确的key呢？</p>
 <p>这个时候需要用到ssh的config以及ssh-agent来解决这个问题，下面我们一步步来说明这个过程。</p>
 <h2 id="生成新的密钥对"><a href="#生成新的密钥对" class="headerlink" title="生成新的密钥对"></a>生成新的密钥对</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -f ~/.ssh/project1_rsa</span><br><span class="line">ssh-keygen -f ~/.ssh/project2_rsa</span><br></pre></td></tr></table></figure>
@@ -222,6 +233,14 @@
         </label>
       </div>
   </div><footer class="post-footer">
+        <div class="post-tags">
+            <a href="/tags/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">云服务器</a>
+            <a href="/tags/%E9%98%BF%E9%87%8C%E4%BA%91/">阿里云</a>
+            <a href="/tags/%E8%85%BE%E8%AE%AF%E4%BA%91/">腾讯云</a>
+            <a href="/tags/%E5%8D%8E%E4%B8%BA%E4%BA%91/">华为云</a>
+            <a href="/tags/ssh/">ssh</a>
+            <a href="/tags/git/">git</a>
+            </div>
         
         <nav class="post-nav"><a class="next" href="/2020/10/12/setup-new-project-on-cloud-server/">
         <span class="next-text nav-default">在linux云服务器上部署新项目</span>
