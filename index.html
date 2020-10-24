@@ -128,6 +128,69 @@
         <div class="content-wrapper">
           <div id="content" class="content"><section id="posts" class="posts"><article class="post">
     <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2020/10/24/auto-start-ssh-agent-and-deploy-multiple-project-with-multiple-ssh-key/">多ssh key部署同一台server以及ssh-agent的最佳实践</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2020-10-24
+        </span><span class="post-visits"
+             data-url="/2020/10/24/auto-start-ssh-agent-and-deploy-multiple-project-with-multiple-ssh-key/"
+             data-title="多ssh key部署同一台server以及ssh-agent的最佳实践">
+          阅读次数 0
+        </span>
+        </div>
+    </header>
+
+    <div class="post-content"><p>有些时候，我们需要在一台服务器里拉取github的项目，由于安全考虑，github的规定一个<code>deploy key</code>只能用在一个项目里面。 所以多个项目就需要我们用多个<code>ssh key</code></p>
+<p>而我们如果只在一台服务器，除了默认生成的<code>id_rsa</code>,则需要为每个项目加入生成一个独立的<code>ssh key</code>，这样就存在多个秘钥和公钥对，那么我们执行<code>git pull</code>或者<code>git push</code>这样的命令的时候，ssh如何找到正确的key呢？</p>
+<p>这个时候需要用到ssh的config以及ssh-agent来解决这个问题，下面我们一步步来说明这个过程。</p>
+<h2 id="生成新的密钥对"><a href="#生成新的密钥对" class="headerlink" title="生成新的密钥对"></a>生成新的密钥对</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -f ~/.ssh/project1_rsa</span><br><span class="line">ssh-keygen -f ~/.ssh/project2_rsa</span><br></pre></td></tr></table></figure>
+<p>上面这个命令,一路回车的话，当然也可以输入密码，如果使用密码，那么在使用的时候则需要输入这个密码（通过ssh-agent这个代理程序可以帮你记住密码，则可以不用每次都输入），这个会在用户的目录下生成2个密码对，生成的内容如下:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt; ls ~/.ssh</span><br><span class="line">project1_rsa <span class="comment"># project1 的私钥</span></span><br><span class="line">project1_rsa.pub <span class="comment"># project2 的公钥</span></span><br><span class="line">project2_rsa</span><br><span class="line">project2_rsa.pub</span><br></pre></td></tr></table></figure>
+
+<p>然后，接下来，为了让ssh知道我们生成的密钥对里面的私钥，需要用<code>ssh-add</code>命令加入</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-add ~/.ssh/project1_rsa</span><br></pre></td></tr></table></figure>
+<p>如果报下面这个错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Could not open a connection to your authentication agent.</span><br></pre></td></tr></table></figure>
+<p>则说明<code>ssh-agent</code>代理程序没有启动，那么再返回来启动这个代理程序,然后再加入</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">eval</span> `ssh-agent -s` <span class="comment"># 启动代理</span></span><br><span class="line">ssh-add ~/.ssh/project1_rsa</span><br><span class="line">ssh-add ~/.ssh/project2_rsa</span><br></pre></td></tr></table></figure>
+<p>这里有个问题，<code>ssh-agent</code>不一定是默认启动的,这个agent在下一个终端会话进来后可能用不了，这个问题我们后面在说。</p>
+<p>接下来，为了完成让git pull的时候，自动认得目录，接下来，我们要做两个配置</p>
+<h3 id="1-创建-ssh-config"><a href="#1-创建-ssh-config" class="headerlink" title="1. 创建~/.ssh/config"></a>1. 创建~/.ssh/config</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">touch ~&#x2F;.ssh&#x2F;config</span><br></pre></td></tr></table></figure>
+<p>把下面内容贴进去</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Host project1</span><br><span class="line">  HostName github.com</span><br><span class="line">  User git</span><br><span class="line">  IdentityFile &#x2F;home&#x2F;ubuntu&#x2F;.ssh&#x2F;project1_rsa</span><br><span class="line">Host project2</span><br><span class="line">  HostName github.com</span><br><span class="line">  User git</span><br><span class="line">  IdentityFile &#x2F;home&#x2F;ubuntu&#x2F;.ssh&#x2F;project2_rsa</span><br></pre></td></tr></table></figure>
+<p>这个配置的意思是，当ssh碰到要去连接的Host为project1的时候，会把HostName 设置为 github.com,并且使用git用户，私钥使用的是<code>IdentityFile /home/ubuntu/.ssh/project1_rsa</code></p>
+<h3 id="2-修改git-remote"><a href="#2-修改git-remote" class="headerlink" title="2. 修改git remote"></a>2. 修改git remote</h3><p>进入你的github项目</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git remote set-url origin git@project1:&lt;your github name&gt;&#x2F;project1.git</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>your github name： 是你在github注册的名字</li>
+</ul>
+<p>由于这里使用的git ssh协议，那么在你执行<code>git pull</code>这些命令的时候，它会去寻找命令<code>～/.ssh/config</code>里面的配置，然后找到根据<code>git@project1</code>来找到<code>Host project1</code>的配置，然后机会ssh会使用这些配置来执行命令。</p>
+<h2 id="ssh-agent自动启动"><a href="#ssh-agent自动启动" class="headerlink" title="ssh-agent自动启动"></a>ssh-agent自动启动</h2><p>ssh-agent进程一般来说会自动启动，并会自动加载<code>~/.ssh/id_rsa</code>，它启动的时候，创建一个继承<code>SSH_AUTH_SOCK</code>和<code>SSH_AGENT_PID</code>环境变量的进程，那么如果你开的会话并没有这些环境变量，那么你的会话无法正确的链接到ssh-agent，即使你用<code>ps -aux | grep ssh-agent</code>可以看到有这个进程，甚至可能有多个ssh-agent(因为你在多个会话里面执行过多次”eval <code>ssh-agent -s</code>“)也无济于事。</p>
+<p>如果没有这些环境变量，你执行<code>ssh-add</code>命令的时候，它连不到已经启动的<code>ssh-agent</code>,所以会报<code>Could not open a connection to your authentication agent.</code>这样的错误。</p>
+<p>所以我们确保我们启动会话的时候启动<code>ssh-agent</code>。为了实现这个你可以在<code>~/.bashrc</code>或者<code>~/.bash_profile</code>或者<code>~/.profile</code>这些会话启动的时候会加载shell里面加入启动命令，实现的方法有多种，比如你可以直接加入<code>eval</code>ssh-agent -s``. 那么而每次启动，然后同时加入<code>trap &#39;kill $SSH_AGENT_PID&#39; EXIT</code>，让会话退出的时候kill掉这个启动的经常。 然而这样做，每当你其他一个shell就会创建一个ssh-agent的进程。</p>
+<p>为了解决这个问题，可以用封装成下面的命令，加入到<code>~/.bashrc</code>(<code>~/.bash_profile</code>或者<code>~/.profile</code>)</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">SSH_ENV=<span class="string">"<span class="variable">$HOME</span>/.ssh/agent-environment"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> addAdditionSSHKey &#123;</span><br><span class="line">  /usr/bin/ssh-add <span class="variable">$HOME</span>/.ssh/project1_rsa;</span><br><span class="line">  /usr/bin/ssh-add <span class="variable">$HOME</span>/.ssh/project2_rsa;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> start_agent &#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Initialising new SSH agent..."</span></span><br><span class="line">    /usr/bin/ssh-agent | sed <span class="string">'s/^echo/#echo/'</span> &gt; <span class="string">"<span class="variable">$&#123;SSH_ENV&#125;</span>"</span></span><br><span class="line">    <span class="built_in">echo</span> succeeded</span><br><span class="line">    chmod 600 <span class="string">"<span class="variable">$&#123;SSH_ENV&#125;</span>"</span></span><br><span class="line">    . <span class="string">"<span class="variable">$&#123;SSH_ENV&#125;</span>"</span> &gt; /dev/null</span><br><span class="line">    /usr/bin/ssh-add; <span class="comment"># add default id</span></span><br><span class="line">    addAdditionSSHKey; <span class="comment"># add addition ids</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Source SSH settings, if applicable</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ -f <span class="string">"<span class="variable">$&#123;SSH_ENV&#125;</span>"</span> ]; <span class="keyword">then</span></span><br><span class="line">    . <span class="string">"<span class="variable">$&#123;SSH_ENV&#125;</span>"</span> &gt; /dev/null</span><br><span class="line">    <span class="comment">#ps $&#123;SSH_AGENT_PID&#125; doesn't work under cywgin</span></span><br><span class="line">    ps -ef | grep <span class="variable">$&#123;SSH_AGENT_PID&#125;</span> | grep ssh-agent$ &gt; /dev/null || &#123;</span><br><span class="line">        start_agent;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    start_agent;</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<p>其中<code>addAdditionSSHKey</code>可以配置你要加入的私钥，每次你加入新的私钥的后，都可以直接在新的会话窗口直接执行<code>addAdditionSSHKey</code>帮助你加入新的key</p>
+<p>这个段shell会先判断<code>~/.ssh</code>目录下面存储的<code>agent-environment</code>环境变量信息是否存在，如果存在，说明之前已经启动了一个ssh-agent进程，只需要把它的变量export到当前的会话即可，如果没有，则启动一个新的ssh-agent，并把相关环境变量保存下来</p>
+<p>这个<code>agent-environment</code>环境变量存储的信息大约如下，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SSH_AUTH_SOCK=/tmp/ssh-qyakUB3GkFmc/agent.9914; <span class="built_in">export</span> SSH_AUTH_SOCK;</span><br><span class="line">SSH_AGENT_PID=9916; <span class="built_in">export</span> SSH_AGENT_PID;</span><br><span class="line"><span class="comment">#echo Agent pid 9916;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>. &quot;${SSH_ENV}&quot; &gt; /dev/null</code>则个语句就是执行命令，把已经保存的环境变量export到当前的会话。</p>
+<blockquote>
+<p>reference:</p>
+<ul>
+<li><a href="http://mah.everybody.org/docs/ssh" target="_blank" rel="noopener">http://mah.everybody.org/docs/ssh</a></li>
+<li><a href="https://stackoverflow.com/questions/18880024/start-ssh-agent-on-login" target="_blank" rel="noopener">https://stackoverflow.com/questions/18880024/start-ssh-agent-on-login</a></li>
+</ul>
+</blockquote>
+
+        </div></article>
+      <article class="post">
+    <header class="post-header">
       <h1 class="post-title"><a class="post-link" href="/2020/10/12/setup-new-project-on-cloud-server/">在linux云服务器上部署新项目</a>
         </h1>
 
@@ -755,36 +818,11 @@
             <a href="/2020/03/22/what-is-nat/" class="read-more-link">阅读更多</a>
           </div>
         </div></article>
-      <article class="post">
-    <header class="post-header">
-      <h1 class="post-title"><a class="post-link" href="/2020/03/01/macos-freebsd-router-ruler/">mac os (freebsd)的路由规则学习</a>
-        </h1>
-
-      <div class="post-meta">
-        <span class="post-time">
-          2020-03-01
-        </span><span class="post-category">
-            <a href="/categories/%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF/">网络技术</a>
-            </span>
-        <span class="post-visits"
-             data-url="/2020/03/01/macos-freebsd-router-ruler/"
-             data-title="mac os (freebsd)的路由规则学习">
-          阅读次数 0
-        </span>
-        </div>
-    </header>
-
-    <div class="post-content"><p>MacOS的路由表查询不是用我们熟知的route命令，而是使用命令 <code>netstat -r</code> 或者<code>netstat -nr</code>(不做域名解释)来查看</p>
-<blockquote>
-<p>netstat -r<br>Routing tables</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Internet:</span><br><span class="line">Destination        Gateway            Flags        Netif Expire</span><br><span class="line">default            192.168.3.1        UGSc           en0</span><br><span class="line">127                localhost          UCS            lo0</span><br><span class="line">localhost          localhost          UH             lo0</span><br><span class="line">169.254            link#4             UCS            en0      !</span><br><span class="line">192.168.3          link#4             UCS            en0      !</span><br><span class="line">192.168.3.1&#x2F;32     link#4             UCS            en0      !</span><br><span class="line">192.168.3.1        a1:9b:00:00:ea:18  UHLWIir        en0   1165</span><br><span class="line">192.168.3.4        51:00:00:00:ee:18  UHLWIi         en0   1153</span><br><span class="line">192.168.3.5&#x2F;32     link#4             UCS            en0      !</span><br><span class="line">192.168.3.8        a1:1f:00:00:a:88   UHLWIi         en0    795</span><br><span class="line">224.0.0&#x2F;4          link#4             UmCS           en0      !</span><br><span class="line">224.0.0.251        1:0:00:0:0:fb      UHmLWI         en0</span><br><span class="line">239.255.255.250    1:0:00:11:ff:fa    UHmLWI         en0</span><br><span class="line">255.255.255.255&#x2F;32 link#4             UCS            en0      !</span><br></pre></td></tr></table></figure>
-<p>如果加-n不解析域名也就是,那么destination就是ip，如:</p>
-          <div class="read-more">
-            <a href="/2020/03/01/macos-freebsd-router-ruler/" class="read-more-link">阅读更多</a>
-          </div>
-        </div></article>
-      <nav class="pagination"></nav></section></div></div>
+      <nav class="pagination"><a class="next" href="/page/2/">
+        <span class="next-text">下一页</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></section></div></div>
       </main>
 
       <footer id="footer" class="footer"><div class="social-links"><a href="https://github.com/noosphere-coder" target="_blank" rel="noopener" class="iconfont icon-github" title="github"></a>
